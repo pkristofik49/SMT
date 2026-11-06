@@ -57,7 +57,7 @@
     win.BarcodeDetector = class {
       static async getSupportedFormats() { return ['qr_code']; }
       constructor(options) { check(options.formats.join() === 'qr_code', 'Detection is restricted to QR codes'); }
-      detect(source) { check(source.tagName === 'VIDEO', 'Detection reads the live video'); return decode(); }
+      detect(source) { check(['VIDEO', 'IMG'].includes(source.tagName), 'Detection reads a native video or image source'); return decode(source); }
     };
     await open();
     check(!doc.querySelector('.primary-button').disabled && cameraCalls === 0, 'Camera starts only after an explicit click');
@@ -113,6 +113,62 @@
     doc.querySelector('.primary-button').click();
     await until(() => doc.querySelector('.qr-result'));
     check(doc.querySelector('.qr-result p').textContent === win.SmallToolsTranslations.cs['qr.emptyResult'], 'Empty decoded text is a valid result');
+    const canvas = doc.createElement('canvas');
+    canvas.width = canvas.height = 32;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const photo = new win.File([blob], 'photo.png', { type: 'image/png' });
+    const selectPhoto = file => {
+      const input = doc.querySelector('input[type="file"]');
+      const transfer = new win.DataTransfer();
+      if (file) transfer.items.add(file);
+      input.files = transfer.files;
+      input.dispatchEvent(new win.Event('change', { bubbles: true }));
+    };
+    const activeUrls = new Set();
+    const createObjectURL = win.URL.createObjectURL.bind(win.URL);
+    const revokeObjectURL = win.URL.revokeObjectURL.bind(win.URL);
+    win.URL.createObjectURL = value => { const url = createObjectURL(value); activeUrls.add(url); return url; };
+    win.URL.revokeObjectURL = url => { activeUrls.delete(url); revokeObjectURL(url); };
+    decode = async () => [];
+    doc.querySelector('.primary-button').click();
+    await until(() => doc.querySelector('.camera-active'));
+    const callsBeforePhoto = cameraCalls;
+    decode = async source => {
+      check(source.tagName === 'IMG' && source.naturalWidth === 32, 'Photo detection receives a decoded local image');
+      return [{ rawValue: 'https://example.com/photo' }];
+    };
+    selectPhoto(photo);
+    await until(() => doc.querySelector('.qr-result-link')?.href === 'https://example.com/photo');
+    check(cameraCalls === callsBeforePhoto && tracks.every(track => track.readyState === 'ended'), 'Selecting a photo stops the camera without requesting camera access');
+    check(activeUrls.size === 0 && doc.querySelector('input[type="file"]').value === '', 'Successful photo decoding releases its URL and resets the picker');
+    selectPhoto();
+    await pause();
+    check(doc.querySelector('.qr-result-link')?.href === 'https://example.com/photo', 'Cancelling file selection preserves the result');
+    selectPhoto(photo);
+    await until(() => doc.querySelector('.qr-result-link') && activeUrls.size === 0);
+    check(activeUrls.size === 0, 'The same photo can be selected again');
+    decode = async () => [];
+    selectPhoto(photo);
+    await until(() => doc.querySelector('.qr-error'));
+    check(doc.querySelector('.qr-error').textContent === win.SmallToolsTranslations.cs['qr.error.noCodeInPhoto'] && activeUrls.size === 0, 'Photos without QR codes provide feedback and release resources');
+    selectPhoto(new win.File(['not an image'], 'broken.png', { type: 'image/png' }));
+    await until(() => doc.querySelector('.qr-error')?.textContent === win.SmallToolsTranslations.cs['qr.error.photo']);
+    check(activeUrls.size === 0, 'Unreadable images provide feedback and release resources');
+    let resolvePhoto;
+    decode = () => new Promise(resolve => { resolvePhoto = resolve; });
+    selectPhoto(photo);
+    await until(() => resolvePhoto);
+    doc.querySelector('.scanner-controls > .secondary-button').click();
+    resolvePhoto([{ rawValue: 'cancelled photo' }]);
+    await pause();
+    check(!doc.querySelector('.qr-result') && activeUrls.size === 0, 'Cancelling photo decoding discards late results and releases resources');
+    await close();
+    Object.defineProperty(win.navigator, 'mediaDevices', { configurable: true, value: undefined });
+    await open();
+    check(doc.querySelector('.primary-button').disabled && !doc.querySelector('.photo-button').disabled, 'Photo reading remains available without camera APIs');
+    decode = async () => [{ rawValue: 'photo without camera' }];
+    selectPhoto(photo);
+    await until(() => doc.querySelector('.qr-result-data')?.textContent === 'photo without camera');
     check(doc.documentElement.scrollWidth <= win.innerWidth, 'The reader fits a mobile viewport');
     await close();
     lines.push('\nALL TESTS PASSED');

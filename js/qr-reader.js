@@ -5,7 +5,9 @@ globalThis.SmallToolsQrReader = {
   setup() {
     const { computed, ref, onMounted, onBeforeUnmount } = Vue;
     const video = ref(null);
+    const photoInput = ref(null);
     const capability = ref('checking');
+    const canReadPhoto = computed(() => ['ready', 'noCamera'].includes(capability.value));
     const state = ref('idle');
     const result = ref(null);
     const resultUrl = computed(() => {
@@ -24,10 +26,20 @@ globalThis.SmallToolsQrReader = {
     let timer;
     let generation = 0;
     let disposed = false;
+    let photoUrl;
+    let photoImage;
 
     function stopCamera() {
       generation++;
       clearTimeout(timer);
+      if (photoImage) {
+        photoImage.src = '';
+        photoImage = null;
+      }
+      if (photoUrl) {
+        URL.revokeObjectURL(photoUrl);
+        photoUrl = null;
+      }
       if (stream) {
         for (const track of stream.getTracks()) {
           track.onended = null;
@@ -69,7 +81,7 @@ globalThis.SmallToolsQrReader = {
     }
 
     async function startCamera() {
-      if (disposed || capability.value !== 'ready' || ['starting', 'scanning'].includes(state.value)) return;
+      if (disposed || capability.value !== 'ready' || ['starting', 'scanning', 'readingPhoto'].includes(state.value)) return;
       stopCamera();
       const session = generation;
       result.value = null;
@@ -108,6 +120,40 @@ globalThis.SmallToolsQrReader = {
       }
     }
 
+    async function readPhoto(event) {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file || disposed || !canReadPhoto.value) return;
+      stopCamera();
+      const session = generation;
+      result.value = null;
+      errorKey.value = '';
+      state.value = 'readingPhoto';
+      if (file.type && !file.type.startsWith('image/')) {
+        fail('qr.error.photo');
+        return;
+      }
+      try {
+        const image = new Image();
+        photoImage = image;
+        photoUrl = URL.createObjectURL(file);
+        image.src = photoUrl;
+        await image.decode();
+        if (disposed || session !== generation) return;
+        const codes = await detector.detect(image);
+        if (disposed || session !== generation) return;
+        const code = codes.find(item => typeof item.rawValue === 'string');
+        if (!code) {
+          fail('qr.error.noCodeInPhoto');
+          return;
+        }
+        result.value = code.rawValue;
+        stopCamera();
+      } catch {
+        if (!disposed && session === generation) fail('qr.error.photo');
+      }
+    }
+
     const onVisibilityChange = () => { if (document.hidden) stopCamera(); };
     onMounted(async () => {
       document.addEventListener('visibilitychange', onVisibilityChange);
@@ -140,6 +186,6 @@ globalThis.SmallToolsQrReader = {
       window.removeEventListener('pagehide', stopCamera);
     });
 
-    return { video, capability, state, result, resultUrl, errorKey, startCamera, stopCamera };
+    return { video, photoInput, canReadPhoto, capability, state, result, resultUrl, errorKey, startCamera, stopCamera, readPhoto };
   },
 };

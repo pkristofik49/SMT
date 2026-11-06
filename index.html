@@ -90,9 +90,13 @@
         <div v-if="state === 'scanning'" class="scan-guide" aria-hidden="true"></div>
       </div>
       <div class="scanner-controls">
-        <button v-if="state === 'starting' || state === 'scanning'" type="button" class="secondary-button" @click="stopCamera">{{ t('qr.stop') }}</button>
+        <button v-if="state === 'readingPhoto'" type="button" class="secondary-button" @click="stopCamera">{{ t('qr.cancelPhoto') }}</button>
+        <button v-else-if="state === 'starting' || state === 'scanning'" type="button" class="secondary-button" @click="stopCamera">{{ t('qr.stop') }}</button>
         <button v-else type="button" class="primary-button" :disabled="capability !== 'ready'" @click="startCamera">{{ t(result === null ? 'qr.start' : 'qr.again') }}</button>
+        <button type="button" class="secondary-button photo-button" :disabled="!canReadPhoto || state === 'readingPhoto'" @click="photoInput.click()">{{ t('qr.choosePhoto') }}</button>
+        <input ref="photoInput" type="file" accept="image/*" hidden @change="readPhoto">
       </div>
+      <p v-if="state === 'readingPhoto'" class="scan-status" role="status">{{ t('qr.readingPhoto') }}</p>
       <p v-if="state === 'scanning'" class="scan-status" role="status">{{ t('qr.scanning') }}</p>
       <p v-if="errorKey" class="qr-error" role="alert">{{ t(errorKey) }}</p>
       <section v-if="result !== null" class="qr-result" aria-labelledby="qr-result-title" aria-live="polite">

@@ -99,10 +99,11 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16806e; outline-offs
 .camera-placeholder > span { font-size: 48px; }
 .camera-placeholder p { font-size: 14px; }
 .scan-guide { position: absolute; width: 58%; aspect-ratio: 1; max-height: 80%; border: 2px solid #ffffffb0; border-radius: 16px; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-.scanner-controls { display: flex; margin-top: 18px; gap: 10px; }
+.scanner-controls { display: flex; flex-wrap: wrap; margin-top: 18px; gap: 10px; }
 .primary-button, .secondary-button { min-height: 44px; border-radius: 9px; padding: 12px 20px; font-weight: 600; font-size: 14px; cursor: pointer; }
 .primary-button { background: #16796c; border: 1px solid #16796c; color: #fff; }
 .secondary-button { background: #fff; color: #263d39; border: 1px solid #c3d2cd; }
+.secondary-button:disabled { opacity: .55; cursor: not-allowed; }
 .primary-button:disabled { background: #e0e7e4; border-color: #e0e7e4; color: #61716b; cursor: not-allowed; }
 .scan-status { color: #57766d; font-size: 13px; line-height: 1.7; }
 .qr-error { margin-top: 18px; background: #fff0ed; border-color: #eac8bf; }
