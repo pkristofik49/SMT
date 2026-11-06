@@ -1,15 +1,69 @@
 <!doctype html>
 <html lang="cs">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f6f8fa" />
-    <meta name="description" content="Small Tools — malé nástroje pro každodenní úkoly na jednom místě." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Small Tools — malé nástroje, velká pomoc</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8fa">
+  <meta name="description" content="">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <title>Small Tools</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/vue.global.prod.js"></script>
+  <script defer src="js/translations.js"></script>
+  <script defer src="js/version.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <noscript>Pro spuštění aplikace povolte JavaScript. Enable JavaScript to run this application.</noscript>
+  <div id="app" class="page-shell" v-cloak>
+    <header class="site-header">
+      <a class="brand" href="#/" :aria-label="t('brand.home')">
+        <span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>small<span class="brand-light">tools</span><span class="brand-dot">.</span></span>
+      </a>
+      <span class="header-note">{{ t('header.note') }}</span>
+    </header>
+
+    <main id="main-content">
+      <section class="intro" aria-labelledby="page-title">
+        <span class="eyebrow"><span class="status-dot"></span> {{ t('menu.eyebrow') }}</span>
+        <h1 id="page-title">{{ t('menu.title') }}<br /><span>{{ t('menu.subtitle') }}</span></h1>
+        <p>{{ t('menu.intro') }}<br class="desktop-break" /> {{ t('menu.invitation') }}</p>
+      </section>
+
+      <section class="tool-section" aria-labelledby="tools-title">
+        <div class="section-heading">
+          <div class="section-title"><h2 id="tools-title">{{ t('tools.heading') }}</h2><span class="count">{{ tools.length }}</span></div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4 4" /></svg>
+            <label class="sr-only" for="tool-search">{{ t('search.label') }}</label>
+            <input id="tool-search" v-model="query" type="search" :placeholder="t('search.placeholder')" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="tool-grid">
+          <article v-for="tool in filteredTools" :key="tool.id" class="tool-card" :class="tool.color" :aria-labelledby="`title-${tool.id}`">
+            <div class="card-top">
+              <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path v-for="(path, index) in icons[tool.icon]" :key="index" :d="path" /></svg></span>
+              <span class="coming-soon">{{ t('tools.comingSoon') }}</span>
+            </div>
+            <div class="card-copy">
+              <span class="category">{{ tool.category }}</span>
+              <h3 :id="`title-${tool.id}`">{{ tool.name }}</h3>
+              <p>{{ tool.description }}</p>
+            </div>
+          </article>
+        </div>
+        <div v-if="filteredTools.length === 0" class="empty-state" role="status">
+          <h3>{{ t('search.emptyTitle') }}</h3>
+          <p>{{ t('search.emptyDescription') }}</p>
+          <button type="button" @click="query = ''">{{ t('search.reset') }}</button>
+        </div>
+        <p class="roadmap-note"><span aria-hidden="true">＋</span> {{ t('menu.roadmap') }}</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>SMT · {{ version }}</span></footer>
+  </div>
+</body>
 </html>

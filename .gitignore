@@ -3,3 +3,6 @@ dist/
 .vite/
 *.local
 .tools/
+_site/
+.browser-*/
+.test-*/
