@@ -26,3 +26,11 @@ npm run preview
 ```
 
 Výstup sestavení je v `dist/`. Dlaždice lze přidávat do pole `tools` v `src/App.vue`.
+
+## GitHub Pages
+
+Aplikace je dostupná na https://pkristofik49.github.io/SMT/.
+
+Workflow `.github/workflows/deploy.yml` při každém pushi do `main` nainstaluje závislosti přes `npm ci`, sestaví aplikaci a nasadí `dist/` na GitHub Pages. Nasazení lze spustit také ručně v záložce Actions pomocí `workflow_dispatch`.
+
+V nastavení repozitáře **Settings → Pages → Source** se používá **GitHub Actions**. Vite má nastavené `base: '/SMT/'`, aby odkazy na assety fungovaly pod cestou repozitáře. Lokální dev server i preview proto obsluhují aplikaci na `/SMT/`.
