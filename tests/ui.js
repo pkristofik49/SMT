@@ -25,7 +25,7 @@
       search.dispatchEvent(new win.Event('input', { bubbles: true }));
       await settle();
     };
-    assert(cards().length === 6, 'All six placeholder cards render');
+    assert(cards().length === 7 && doc.querySelector('a[href="#/qr-reader"]'), 'The QR tool and six placeholder cards render');
     assert(!doc.querySelector('[v-cloak]'), 'Vue mounts the classic-script template');
     assert(doc.title === win.SmallToolsTranslations.cs['page.title'], 'Page metadata uses translations');
     assert(doc.querySelector('.site-footer').textContent.trim() === 'SMT · ' + win.SmallToolsVersion, 'Footer displays the application version');
@@ -41,7 +41,7 @@
     assert(cards().length === 0 && doc.querySelector('.empty-state'), 'An empty search provides feedback');
     doc.querySelector('.empty-state button').click();
     await settle();
-    assert(cards().length === 6 && search.value === '', 'Reset restores the complete menu');
+    assert(cards().length === 7 && search.value === '', 'Reset restores the complete menu');
     for (const width of [320, 960]) {
       frame.width = width;
       await settle();

@@ -4,7 +4,15 @@ Small tools — malé nástroje pro každý den
 
 [English version](README.md) · [Živá aplikace](https://pkristofik49.github.io/SMT/)
 
-Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Samotné nástroje zatím nejsou implementované. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvním funkčním nástrojem je čtečka QR kódů kamerou; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+
+## Čtečka QR kódů
+
+Otevřete první dlaždici nebo `#/qr-reader`, zvolte **Spustit kameru** a povolte přístup. Aplikace požádá o zadní kameru bez přístupu k mikrofonu. Po načtení prvního QR kódu kameru zastaví a zobrazí přesný dekódovaný text včetně zalomení řádků. Výsledek se vykreslí jako text; HTML se nespouští a odkazy se automaticky neotevírají. Stejným tlačítkem zahájíte další načítání. Obraz ani výsledek se nikam neodesílají ani neukládají do úložiště prohlížeče.
+
+Implementace používá pouze nativní `BarcodeDetector` s formátem `qr_code` a `getUserMedia`. Podpora se ověří před žádostí o kameru. Mezi podporované prohlížeče patří Chrome na Androidu; Safari na iPhonu zatím podporované není a zobrazí vysvětlení. Kamera vyžaduje HTTPS nebo localhost; náhled přímo ze souboru zobrazí upozornění. Odmítnutí přístupu, chybějící či obsazená kamera a přerušený stream mají lokalizované zprávy. Zastavení, návrat do menu, skrytí stránky i její opuštění kameru uvolní, včetně přístupu uděleného až po zrušení. Funguje tlačítko Zpět v prohlížeči i přímé odkazy s hashem.
+
+Čtečka je součástí cache PWA a po prvním úplném online načtení se otevře offline. Podpora kamery a dekódování stále závisí na prohlížeči a zařízení. Žádná knihovna pro dekódování QR nebyla přidaná.
 
 ## Spuštění
 
@@ -18,7 +26,7 @@ Použijte běžný web, nebo otevřete [Small Tools](https://pkristofik49.github
 
 `manifest.webmanifest` definuje relativní ID aplikace, startovací URL a rozsah; funguje pod `/SMT/` i v kořeni místního HTTP serveru. Místní PNG ikony zahrnují aplikační ikony 192 a 512 px, maskovatelnou ikonu 512 px a Apple touch ikonu 180 px. `scripts/generate-icons.ps1` je reprodukuje podle stávající značky s mřížkou pomocí Windows System.Drawing bez dalších závislostí.
 
-`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Jednotlivé nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
+`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
 
 Každá verze předem uloží všechny soubory aplikace. Neúplné stažení přeruší instalaci a zachová běžící verzi. Úplná aktualizace čeká na zavření všech karet prohlížeče a oken aplikace používajících předchozí worker; po opětovném otevření se aktivuje. Nedochází k vynucenému obnovení ani `skipWaiting()`. Návrat do viditelné aplikace nebo obnovení připojení ověří aktualizace. Úklid cache se týká pouze starých verzí této aplikace v jejím rozsahu. Nové soubory potřebné za běhu přidávejte do `SHELL` a `RELEASE` workeru udržujte shodný s verzí aplikace.
 
@@ -28,6 +36,7 @@ Každá verze předem uloží všechny soubory aplikace. Neúplné stažení př
 index.html                   Vue šablona a vstupní body skriptů
 styles.css                   Responzivní vzhled
 js/app.js                    Stav, katalog nástrojů, hledání a ikony
+js/qr-reader.js              Komponenta nativní kamery a čtečky QR
 js/translations.js           Lokalizované texty aplikace (čeština)
 js/version.js                Verze aplikace
 js/pwa.js                    Registrace service workeru a kontroly aktualizací
@@ -39,6 +48,7 @@ icons/                       Ikona aplikace
 scripts/update-version.ps1   Skript pro aktualizaci verze
 scripts/generate-icons.ps1   Reprodukovatelné instalační ikony
 tests/ui.html                Integrační testy v prohlížeči
+tests/qr.html                Integrační testy životního cyklu čtečky QR
 tests/versioning.ps1         Oddělené testy verzovacího hooku
 tests/pwa.html               Integrační testy offline provozu a aktualizací
 tests/serve-pwa.ps1          Místní server testů PWA
@@ -76,6 +86,8 @@ Testy verzování používají oddělený ignorovaný repozitář `.test-version
 Pro integrační testy PWA spusťte v jednom terminálu `powershell -NoProfile -ExecutionPolicy Bypass -File tests/serve-pwa.ps1` a ve druhém `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1`. Používají `http://localhost:8766/SMT/` a nový oddělený profil Edge bez okna. Po dokončení server zastavte pomocí Ctrl+C. Parametr `-BasePath /` u obou skriptů ověří kořen místního serveru. Ovládací adresy serveru pro offline režim a verze slouží pouze testům.
 
 Testy PWA pokrývají manifest, skutečné rozměry ikon, úplné přednačtení souborů, offline spuštění a hledání při odpovědích serveru 503, čekající úplné aktualizace, neúplné neúspěšné aktualizace a zachování cizích cache. Samotná instalace přes rozhraní prohlížeče či telefonu vyžaduje ruční ověření na zařízení.
+
+Při běžícím stejném testovacím serveru spusťte `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage qr.html` pro ověření čtečky se simulovanými streamy kamery a simulovaným detektorem. Testy pokrývají nepodporovaný prohlížeč, odmítnutí přístupu, textové i prázdné výsledky, zrušení, navigaci a opožděné asynchronní výsledky. Neověřují optické dekódování přes fyzickou kameru mobilu; to otestujte ručně na podporovaném telefonu.
 
 ## GitHub Pages
 

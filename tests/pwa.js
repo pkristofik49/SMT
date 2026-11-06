@@ -24,7 +24,7 @@
       frame.addEventListener('load', resolve, { once: true });
       frame.src = new URL(path, root).href;
     });
-    await until(() => frame.contentDocument.querySelectorAll('.tool-card').length === 6 && !frame.contentDocument.querySelector('[v-cloak]'));
+    await until(() => frame.contentDocument.querySelectorAll('.tool-card').length === 7 && !frame.contentDocument.querySelector('[v-cloak]'));
   };
   let registration;
   const unrelated = 'pwa-test-unrelated';
@@ -36,7 +36,7 @@
       registration = await navigator.serviceWorker.getRegistration(root.href);
       return registration?.active?.state === 'activated' && frame.contentWindow.navigator.serviceWorker.controller;
     });
-    check('The ordinary website renders six tools with service-worker support', frame.contentDocument.querySelectorAll('.tool-card').length === 6);
+    check('The ordinary website renders the tool menu with service-worker support', frame.contentDocument.querySelectorAll('.tool-card').length === 7);
     const manifest = await (await fetch(new URL('manifest.webmanifest', root))).json();
     check('The standalone manifest scopes installation to this project', new URL(manifest.id, root).href === root.href && new URL(manifest.scope, root).href === root.href && new URL(manifest.start_url, root).href === root.href && manifest.display === 'standalone');
     for (const icon of manifest.icons) {
@@ -48,12 +48,12 @@
     check('Manifest includes a maskable icon', manifest.icons.some(icon => icon.purpose === 'maskable' && icon.sizes === '512x512'));
     const cache = await caches.open(`${prefix}v1`);
     const resources = await cache.keys();
-    check('The complete application shell is cached', resources.length === 13 && (await cache.match(new URL('js/app.js', root)))?.ok && (await cache.match(new URL('js/version.js', root)))?.ok);
+    check('The complete application shell includes the QR reader', resources.length === 14 && (await cache.match(new URL('js/qr-reader.js', root)))?.ok && (await cache.match(new URL('js/version.js', root)))?.ok);
     await caches.open(unrelated);
     await control('offline');
     check('The application server is unavailable during offline checks', (await fetch(new URL('not-cached.txt', root))).status === 503);
     await loadApp('./?offline=1#/');
-    check('A fresh navigation starts offline with query and hash', frame.contentDocument.querySelectorAll('.tool-card').length === 6);
+    check('A fresh navigation starts offline with query and hash', frame.contentDocument.querySelectorAll('.tool-card').length === 7);
     const search = frame.contentDocument.getElementById('tool-search');
     search.value = 'PREVODNIK';
     search.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
@@ -61,6 +61,11 @@
     check('Search remains functional offline', frame.contentDocument.querySelector('.tool-card').getAttribute('aria-labelledby') === 'title-units');
     await loadApp('./index.html?offline=2#/');
     check('Direct index navigation also starts offline', frame.contentDocument.querySelector('.site-footer').textContent.includes(frame.contentWindow.SmallToolsVersion));
+    frame.contentDocument.querySelector('a[href="#/qr-reader"]').click();
+    await until(() => frame.contentDocument.querySelector('.qr-page'));
+    check('The QR reader opens offline without requesting camera access', !!frame.contentDocument.querySelector('.camera-video') && !frame.contentDocument.querySelector('.camera-active'));
+    frame.contentDocument.querySelector('.back-link').click();
+    await until(() => frame.contentDocument.querySelectorAll('.tool-card').length === 7);
     for (const resource of resources) {
       check('Offline resource: ' + new URL(resource.url).pathname, (await fetch(resource.url)).ok);
     }

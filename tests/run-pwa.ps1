@@ -1,15 +1,15 @@
-param([int]$Port = 8766, [int]$DebugPort = 9224, [string]$BasePath = '/SMT/')
+param([int]$Port = 8766, [int]$DebugPort = 9224, [string]$BasePath = '/SMT/', [ValidateSet('pwa.html', 'qr.html')][string]$TestPage = 'pwa.html')
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $profile = Join-Path $root ('.browser-pwa-' + [DateTime]::UtcNow.Ticks)
-$edge = Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList '--headless','--disable-gpu','--no-first-run','--no-default-browser-check',"--remote-debugging-port=$DebugPort","--user-data-dir=$profile","http://localhost:$Port${BasePath}tests/pwa.html" -WindowStyle Hidden -PassThru
+$edge = Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList '--headless','--disable-gpu','--no-first-run','--no-default-browser-check',"--remote-debugging-port=$DebugPort","--user-data-dir=$profile","http://localhost:$Port${BasePath}tests/$TestPage" -WindowStyle Hidden -PassThru
 $socket = New-Object Net.WebSockets.ClientWebSocket
 try {
     $target = $null
     for ($attempt = 0; $attempt -lt 40; $attempt++) {
         try {
             $targets = Invoke-RestMethod "http://localhost:$DebugPort/json"
-            $target = $targets | Where-Object { $_.type -eq 'page' -and $_.url -like '*tests/pwa.html' } | Select-Object -First 1
+            $target = $targets | Where-Object { $_.type -eq 'page' -and $_.url -like "*tests/$TestPage" } | Select-Object -First 1
         } catch {}
         if ($target) { break }
         Start-Sleep -Milliseconds 250

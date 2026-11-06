@@ -1,11 +1,14 @@
-/* global Vue, SmallToolsTranslations, SmallToolsVersion */
+/* global Vue, SmallToolsTranslations, SmallToolsVersion, SmallToolsQrReader */
 Vue.createApp({
+  components: { QrReader: SmallToolsQrReader },
   setup() {
-    const { computed, ref } = Vue
+    const { computed, ref, onBeforeUnmount } = Vue
 
     const query = ref('')
     const t = (key) => SmallToolsTranslations.cs[key] ?? key
+    const page = ref(location.hash === '#/qr-reader' ? 'qr' : 'menu')
     const tools = [
+      { id: 'qr', icon: 'qr', color: 'green', href: '#/qr-reader' },
       { id: 'text', icon: 'text', color: 'green' },
       { id: 'json', icon: 'code', color: 'blue' },
       { id: 'units', icon: 'arrows', color: 'orange' },
@@ -26,6 +29,7 @@ Vue.createApp({
     })
 
     const icons = {
+      qr: ['M3 3h6v6H3ZM15 3h6v6h-6ZM3 15h6v6H3Z', 'M15 15h3v3h3v3h-6v-3m6-6v3M12 3v3m0 6h3M3 12h3m6 6v3'],
       text: ['M4 6h16M12 6v14M8 20h8'],
       code: ['m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14'],
       arrows: ['M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4'],
@@ -34,8 +38,14 @@ Vue.createApp({
       key: ['M14 14a6 6 0 1 0-4-4L3 17v4h4v-3h3l4-4Z', 'M16 8h.01'],
     }
 
-    document.title = t('page.title')
+    const updatePage = () => {
+      page.value = location.hash === '#/qr-reader' ? 'qr' : 'menu'
+      document.title = t(page.value === 'qr' ? 'qr.pageTitle' : 'page.title')
+    }
+    updatePage()
+    window.addEventListener('hashchange', updatePage)
+    onBeforeUnmount(() => window.removeEventListener('hashchange', updatePage))
     document.querySelector('meta[name="description"]').content = t('page.description')
-    return { query, tools, filteredTools, icons, t, version: SmallToolsVersion }
+    return { page, query, tools, filteredTools, icons, t, version: SmallToolsVersion }
   },
 }).mount('#app')
