@@ -97,7 +97,7 @@
       <p v-if="errorKey" class="qr-error" role="alert">{{ t(errorKey) }}</p>
       <section v-if="result !== null" class="qr-result" aria-labelledby="qr-result-title" aria-live="polite">
         <h2 id="qr-result-title">{{ t('qr.result') }}</h2>
-        <pre v-if="result.length" class="qr-result-data">{{ result }}</pre>
+        <pre v-if="result.length" class="qr-result-data"><a v-if="resultUrl" :href="resultUrl" target="_blank" rel="noopener noreferrer" class="qr-result-link" :title="t('qr.openUrl')">{{ result }}</a><template v-else>{{ result }}</template></pre>
         <p v-else>{{ t('qr.emptyResult') }}</p>
       </section>
       <p class="qr-local-note">{{ t('qr.localNote') }}</p>

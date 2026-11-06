@@ -26,6 +26,7 @@ globalThis.SmallToolsTranslations = {
     "qr.starting": "Čekám na povolení a spuštění kamery…",
     "qr.scanning": "Hledám QR kód. Držte telefon klidně a zajistěte dostatek světla.",
     "qr.result": "Obsah QR kódu",
+    "qr.openUrl": "Otevřít adresu v nové kartě prohlížeče",
     "qr.emptyResult": "QR kód obsahuje prázdný text.",
     "qr.localNote": "Obraz se zpracovává přímo v zařízení. Načtený obsah se zobrazuje jako text; odkazy se automaticky neotevírají.",
     "qr.capability.checking": "Ověřuji podporu čtečky v prohlížeči…",

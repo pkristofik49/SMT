@@ -3,11 +3,21 @@ globalThis.SmallToolsQrReader = {
   template: '#qr-reader-template',
   props: { t: { type: Function, required: true } },
   setup() {
-    const { ref, onMounted, onBeforeUnmount } = Vue;
+    const { computed, ref, onMounted, onBeforeUnmount } = Vue;
     const video = ref(null);
     const capability = ref('checking');
     const state = ref('idle');
     const result = ref(null);
+    const resultUrl = computed(() => {
+      const value = result.value?.trim() || '';
+      if (!/^https?:\/\//i.test(value) || /[\s\u0000-\u001f\u007f]/.test(value)) return null;
+      try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+      } catch {
+        return null;
+      }
+    });
     const errorKey = ref('');
     let detector;
     let stream;
@@ -130,6 +140,6 @@ globalThis.SmallToolsQrReader = {
       window.removeEventListener('pagehide', stopCamera);
     });
 
-    return { video, capability, state, result, errorKey, startCamera, stopCamera };
+    return { video, capability, state, result, resultUrl, errorKey, startCamera, stopCamera };
   },
 };

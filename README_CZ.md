@@ -10,6 +10,8 @@ Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvním fun
 
 Otevřete první dlaždici nebo `#/qr-reader`, zvolte **Spustit kameru** a povolte přístup. Aplikace požádá o zadní kameru bez přístupu k mikrofonu. Po načtení prvního QR kódu kameru zastaví a zobrazí přesný dekódovaný text včetně zalomení řádků. Výsledek se vykreslí jako text; HTML se nespouští a odkazy se automaticky neotevírají. Stejným tlačítkem zahájíte další načítání. Obraz ani výsledek se nikam neodesílají ani neukládají do úložiště prohlížeče.
 
+Pokud celý dekódovaný obsah tvoří platná absolutní HTTP nebo HTTPS adresa, lze na ni kliknout a otevřít ji v nové kartě prohlížeče. K otevření dojde až po kliknutí. Okrajové mezery se pro cílovou adresu ignorují, původní obsah zůstává viditelný. Ostatní text a schémata adres zůstávají prostým textem.
+
 Implementace používá pouze nativní `BarcodeDetector` s formátem `qr_code` a `getUserMedia`. Podpora se ověří před žádostí o kameru. Mezi podporované prohlížeče patří Chrome na Androidu; Safari na iPhonu zatím podporované není a zobrazí vysvětlení. Kamera vyžaduje HTTPS nebo localhost; náhled přímo ze souboru zobrazí upozornění. Odmítnutí přístupu, chybějící či obsazená kamera a přerušený stream mají lokalizované zprávy. Zastavení, návrat do menu, skrytí stránky i její opuštění kameru uvolní, včetně přístupu uděleného až po zrušení. Funguje tlačítko Zpět v prohlížeči i přímé odkazy s hashem.
 
 Čtečka je součástí cache PWA a po prvním úplném online načtení se otevře offline. Podpora kamery a dekódování stále závisí na prohlížeči a zařízení. Žádná knihovna pro dekódování QR nebyla přidaná.

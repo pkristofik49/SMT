@@ -10,6 +10,8 @@ A Vue SPA with a two-column tool menu (one column on mobile). The first working 
 
 Open the first tile or `#/qr-reader`, then select **Start camera** and allow camera access. The app requests the rear-facing camera without microphone access. After decoding the first QR code, it stops the camera and displays the exact decoded text, including line breaks. The result is rendered as text; HTML is not executed and links are not opened automatically. Start another scan with the same button. No image or result is uploaded or saved to browser storage.
 
+If the entire decoded content is a valid absolute HTTP or HTTPS URL, it is clickable and opens in a new browser tab only after a click. Surrounding whitespace is ignored for the destination, while the original content remains visible. Other text and URL schemes remain plain text.
+
 The implementation uses only native `BarcodeDetector` with the `qr_code` format and `getUserMedia`. Availability is checked before requesting the camera. Supported browsers include Chrome on Android; Safari on iPhone is currently unsupported and receives an explanatory message. Camera access requires HTTPS or localhost; direct file previews show a notice. Permission denial, missing or busy cameras, and interrupted streams have localized messages. Stopping, returning to the menu, hiding the page, or leaving it releases the camera, including a camera granted after cancellation. Browser Back and direct hash links are supported.
 
 The reader is included in the PWA cache and opens offline after the initial complete online load. Actual camera and decoding support still depend on the browser and device. No QR-decoding library has been added.

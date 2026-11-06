@@ -73,6 +73,17 @@
     check(doc.querySelector('.qr-result-data').textContent === payload && !doc.querySelector('.qr-result img, .qr-result a'), 'Decoded data is displayed exactly as plain text without executing HTML or opening links');
     check(tracks.every(track => track.readyState === 'ended'), 'Successful decoding releases every camera track');
     check(doc.querySelector('.camera-video').srcObject === null, 'Successful decoding detaches the video stream');
+    for (const value of ['https://example.com/path?q=1#section', '  http://example.com/  ', 'javascript:alert(1)', 'data:text/html,test', '/relative/path', 'https://[invalid', 'https://example.com/\nadditional text']) {
+      decode = async () => [{ rawValue: value }];
+      doc.querySelector('.primary-button').click();
+      await until(() => doc.querySelector('.qr-result-data')?.textContent === value);
+      const link = doc.querySelector('.qr-result-link');
+      if (value.trim().startsWith('https://example.com/path') || value.trim() === 'http://example.com/') {
+        check(link?.href === new URL(value.trim()).href && link.target === '_blank' && link.rel.includes('noopener') && link.rel.includes('noreferrer'), 'HTTP(S) results provide a link in a separate browser tab');
+      } else {
+        check(!link, 'Other text, malformed URLs, and non-web schemes remain plain text');
+      }
+    }
     let resolveAcquisition;
     acquire = () => new Promise(resolve => { resolveAcquisition = resolve; });
     doc.querySelector('.primary-button').click();
