@@ -17,7 +17,7 @@
   }
 
   try {
-    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 7);
+    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 8);
     const win = frame.contentWindow;
     const doc = frame.contentDocument;
     // PWA behavior is covered separately; isolate camera/navigation tests from its cache.
@@ -48,7 +48,7 @@
     };
     const close = async () => {
       win.location.hash = '#/';
-      await until(() => doc.querySelectorAll('.tool-card').length === 7);
+      await until(() => doc.querySelectorAll('.tool-card').length === 8);
     };
     delete win.BarcodeDetector;
     await open();

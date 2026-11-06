@@ -1,2 +1,2 @@
 /* The pre-commit hook derives this value from the previous committed version. */
-globalThis.SmallToolsVersion = '1.004';
+globalThis.SmallToolsVersion = '1.005';

@@ -4,7 +4,7 @@ Small tools — malé nástroje pro každý den
 
 [English version](README.md) · [Živá aplikace](https://pkristofik49.github.io/SMT/)
 
-Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvním funkčním nástrojem je čtečka QR kódů kamerou; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvními dvěma funkčními nástroji jsou čtečka QR kódů a místní prohlížeč PDF; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
 
 ## Čtečka QR kódů
 
@@ -18,6 +18,12 @@ Implementace používá pouze nativní `BarcodeDetector` s formátem `qr_code` a
 
 Čtečka je součástí cache PWA a po prvním úplném online načtení se otevře offline. Podpora kamery a dekódování stále závisí na prohlížeči a zařízení. Žádná knihovna pro dekódování QR nebyla přidaná.
 
+## Prohlížeč PDF
+
+Otevřete druhou dlaždici nebo `#/pdf-viewer` a zvolte **Vybrat PDF**. Dokument zůstává v zařízení a zobrazuje se vestavěným prohlížečem PDF bez další knihovny či odesílání na server. K dispozici je název souboru, odkaz pro otevření v nové kartě a odkaz ke stažení. Pokud je vložené zobrazení PDF vypnuté nebo nepodporované, použijte tyto odkazy pro otevření v prohlížeči nebo PDF aplikaci zařízení. Listování, přiblížení, výzvy k zadání hesla a vykreslení závisejí na nativním prohlížeči; fyzický telefon je ještě potřeba ověřit.
+
+Aplikace ověřuje hlavičku PDF v prvních 1024 bajtech; tím rozpozná formát, ale neověřuje celý dokument. Neplatný výběr zobrazí chybu a zachová předchozí dokument. Stejný soubor lze vybrat znovu, zrušení výběru ponechá aktuální dokument a zavření nebo opuštění nástroje uvolní jeho dočasnou URL. Soubory se neukládají do cache PWA ani úložiště prohlížeče a po obnovení stránky je potřeba je vybrat znovu. Samotný nástroj se ukládá pro offline použití.
+
 ## Spuštění
 
 Otevřete `index.html` v aktuálním prohlížeči nebo adresář projektu zpřístupněte stávajícím statickým HTTP serverem, například IIS. Klasické odložené skripty a relativní cesty podporují místní soubory i `/SMT/` na GitHub Pages. Není potřeba správce balíčků, sestavování, Node.js, router ani knihovna uživatelského rozhraní.
@@ -30,7 +36,7 @@ Použijte běžný web, nebo otevřete [Small Tools](https://pkristofik49.github
 
 `manifest.webmanifest` definuje relativní ID aplikace, startovací URL a rozsah; funguje pod `/SMT/` i v kořeni místního HTTP serveru. Místní PNG ikony zahrnují aplikační ikony 192 a 512 px, maskovatelnou ikonu 512 px a Apple touch ikonu 180 px. `scripts/generate-icons.ps1` je reprodukuje podle stávající značky s mřížkou pomocí Windows System.Drawing bez dalších závislostí.
 
-`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
+`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
 
 Každá verze předem uloží všechny soubory aplikace. Neúplné stažení přeruší instalaci a zachová běžící verzi. Úplná aktualizace čeká na zavření všech karet prohlížeče a oken aplikace používajících předchozí worker; po opětovném otevření se aktivuje. Nedochází k vynucenému obnovení ani `skipWaiting()`. Návrat do viditelné aplikace nebo obnovení připojení ověří aktualizace. Úklid cache se týká pouze starých verzí této aplikace v jejím rozsahu. Nové soubory potřebné za běhu přidávejte do `SHELL` a `RELEASE` workeru udržujte shodný s verzí aplikace.
 
@@ -41,6 +47,7 @@ index.html                   Vue šablona a vstupní body skriptů
 styles.css                   Responzivní vzhled
 js/app.js                    Stav, katalog nástrojů, hledání a ikony
 js/qr-reader.js              Komponenta nativní kamery a čtečky QR
+js/pdf-viewer.js             Komponenta nativního prohlížeče místních PDF
 js/translations.js           Lokalizované texty aplikace (čeština)
 js/version.js                Verze aplikace
 js/pwa.js                    Registrace service workeru a kontroly aktualizací
@@ -53,6 +60,7 @@ scripts/update-version.ps1   Skript pro aktualizaci verze
 scripts/generate-icons.ps1   Reprodukovatelné instalační ikony
 tests/ui.html                Integrační testy v prohlížeči
 tests/qr.html                Integrační testy životního cyklu čtečky QR
+tests/pdf.html               Testy výběru PDF a životního cyklu dokumentu
 tests/versioning.ps1         Oddělené testy verzovacího hooku
 tests/pwa.html               Integrační testy offline provozu a aktualizací
 tests/serve-pwa.ps1          Místní server testů PWA
@@ -92,6 +100,8 @@ Pro integrační testy PWA spusťte v jednom terminálu `powershell -NoProfile -
 Testy PWA pokrývají manifest, skutečné rozměry ikon, úplné přednačtení souborů, offline spuštění a hledání při odpovědích serveru 503, čekající úplné aktualizace, neúplné neúspěšné aktualizace a zachování cizích cache. Samotná instalace přes rozhraní prohlížeče či telefonu vyžaduje ruční ověření na zařízení.
 
 Při běžícím stejném testovacím serveru spusťte `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage qr.html` pro ověření čtečky se simulovanými streamy kamery a simulovaným detektorem. Testy pokrývají nepodporovaný prohlížeč, odmítnutí přístupu, textové i prázdné výsledky, zrušení, navigaci a opožděné asynchronní výsledky. Neověřují optické dekódování přes fyzickou kameru mobilu; to otestujte ručně na podporovaném telefonu.
+
+Příkazem `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage pdf.html` ověříte vygenerované platné jednostránkové PDF, místní obsah a MIME typ, náhled i náhradní odkazy, neplatný výběr, opakovaný výběr, zrušení, responzivní rozložení a uvolňování dočasných URL. Ovládání nativního vykreslení PDF dodává prohlížeč.
 
 ## GitHub Pages
 

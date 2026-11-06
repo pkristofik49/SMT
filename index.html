@@ -16,6 +16,7 @@
   <script defer src="js/translations.js"></script>
   <script defer src="js/version.js"></script>
   <script defer src="js/qr-reader.js"></script>
+  <script defer src="js/pdf-viewer.js"></script>
   <script defer src="js/app.js"></script>
   <script defer src="js/pwa.js"></script>
 </head>
@@ -70,7 +71,8 @@
         <p class="roadmap-note"><span aria-hidden="true">＋</span> {{ t('menu.roadmap') }}</p>
       </section>
       </template>
-      <qr-reader v-else :t="t"></qr-reader>
+      <qr-reader v-else-if="page === 'qr'" :t="t"></qr-reader>
+      <pdf-viewer v-else :t="t"></pdf-viewer>
     </main>
 
     <footer class="site-footer"><span>SMT · {{ version }}</span></footer>
@@ -105,6 +107,36 @@
         <p v-else>{{ t('qr.emptyResult') }}</p>
       </section>
       <p class="qr-local-note">{{ t('qr.localNote') }}</p>
+    </section>
+  </template>
+  <template id="pdf-viewer-template">
+    <section class="pdf-page" aria-labelledby="pdf-title">
+      <a class="back-link" href="#/">← {{ t('pdf.back') }}</a>
+      <div class="qr-heading">
+        <span class="eyebrow">{{ t('tool.pdf.category') }}</span>
+        <h1 id="pdf-title">{{ t('tool.pdf.name') }}</h1>
+        <p>{{ t('pdf.intro') }}</p>
+      </div>
+      <div class="scanner-controls">
+        <button type="button" class="primary-button pdf-choose" @click="fileInput.click()">{{ t('pdf.choose') }}</button>
+        <button v-if="fileUrl || loading" type="button" class="secondary-button pdf-clear" @click="clearDocument">{{ t('pdf.close') }}</button>
+        <input ref="fileInput" type="file" accept="application/pdf,.pdf" hidden @change="selectFile">
+      </div>
+      <p v-if="loading" class="scan-status" role="status">{{ t('pdf.loading') }}</p>
+      <p v-if="errorKey" class="qr-error" role="alert">{{ t(errorKey) }}</p>
+      <div v-if="fileUrl" class="pdf-document">
+        <div class="pdf-toolbar">
+          <h2 class="pdf-name">{{ fileName }}</h2>
+          <div class="pdf-actions">
+            <a :href="fileUrl" target="_blank" rel="noopener noreferrer" class="pdf-open">{{ t('pdf.open') }} ↗</a>
+            <a :href="fileUrl" :download="fileName" class="pdf-download">{{ t('pdf.download') }}</a>
+          </div>
+        </div>
+        <iframe v-if="canEmbed" :key="fileUrl" :src="fileUrl" class="pdf-preview" :title="t('pdf.preview')"></iframe>
+        <p class="pdf-fallback">{{ t(canEmbed ? 'pdf.fallback' : 'pdf.unsupported') }}</p>
+      </div>
+      <div v-else-if="!loading" class="pdf-empty"><span aria-hidden="true">▤</span><p>{{ t('pdf.empty') }}</p></div>
+      <p class="qr-local-note">{{ t('pdf.localNote') }}</p>
     </section>
   </template>
 </body>

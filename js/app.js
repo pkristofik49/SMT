@@ -1,14 +1,16 @@
-/* global Vue, SmallToolsTranslations, SmallToolsVersion, SmallToolsQrReader */
+/* global Vue, SmallToolsTranslations, SmallToolsVersion, SmallToolsQrReader, SmallToolsPdfViewer */
 Vue.createApp({
-  components: { QrReader: SmallToolsQrReader },
+  components: { QrReader: SmallToolsQrReader, PdfViewer: SmallToolsPdfViewer },
   setup() {
     const { computed, ref, onBeforeUnmount } = Vue
 
     const query = ref('')
     const t = (key) => SmallToolsTranslations.cs[key] ?? key
-    const page = ref(location.hash === '#/qr-reader' ? 'qr' : 'menu')
+    const routes = { '#/qr-reader': 'qr', '#/pdf-viewer': 'pdf' }
+    const page = ref(routes[location.hash] || 'menu')
     const tools = [
       { id: 'qr', icon: 'qr', color: 'green', href: '#/qr-reader' },
+      { id: 'pdf', icon: 'file', color: 'blue', href: '#/pdf-viewer' },
       { id: 'text', icon: 'text', color: 'green' },
       { id: 'json', icon: 'code', color: 'blue' },
       { id: 'units', icon: 'arrows', color: 'orange' },
@@ -29,6 +31,7 @@ Vue.createApp({
     })
 
     const icons = {
+      file: ['M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z', 'M14 3v6h6M8 13h8M8 17h6'],
       qr: ['M3 3h6v6H3ZM15 3h6v6h-6ZM3 15h6v6H3Z', 'M15 15h3v3h3v3h-6v-3m6-6v3M12 3v3m0 6h3M3 12h3m6 6v3'],
       text: ['M4 6h16M12 6v14M8 20h8'],
       code: ['m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14'],
@@ -39,8 +42,8 @@ Vue.createApp({
     }
 
     const updatePage = () => {
-      page.value = location.hash === '#/qr-reader' ? 'qr' : 'menu'
-      document.title = t(page.value === 'qr' ? 'qr.pageTitle' : 'page.title')
+      page.value = routes[location.hash] || 'menu'
+      document.title = t({ qr: 'qr.pageTitle', pdf: 'pdf.pageTitle', menu: 'page.title' }[page.value])
     }
     updatePage()
     window.addEventListener('hashchange', updatePage)
