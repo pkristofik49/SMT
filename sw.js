@@ -1,7 +1,7 @@
 'use strict';
 
 // The pre-commit hook keeps the cache release aligned with the application version.
-const RELEASE = '1.008';
+const RELEASE = '1.009';
 const CACHE_PREFIX = `small-tools:${self.registration.scope}:`;
 const CACHE_NAME = `${CACHE_PREFIX}${RELEASE}`;
 const appUrl = path => new URL(path, self.registration.scope).href;

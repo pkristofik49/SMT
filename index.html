@@ -170,7 +170,24 @@
       <div class="scanner-controls compass-controls">
         <button v-if="running" type="button" class="secondary-button compass-stop" @click="stop">{{ t('compass.stop') }}</button>
         <button v-else type="button" class="primary-button compass-start" @click="start">{{ t('compass.start') }}</button>
+        <button type="button" class="secondary-button compass-calibration-toggle" :aria-expanded="calibrationOpen" aria-controls="compass-calibration" @click="calibrationOpen = !calibrationOpen">{{ t('compass.calibrate') }}</button>
       </div>
+      <div v-if="source" class="compass-diagnostics">
+        <p>{{ t('compass.source') }}: <span class="compass-source">{{ t('compass.source.' + source) }}</span></p>
+        <p>{{ t('compass.accuracy') }}: <span class="compass-accuracy">{{ accuracy !== null && accuracy >= 0 ? '±' + Math.round(accuracy) + '°' : t('compass.accuracyUnknown') }}</span></p>
+        <p v-if="correction !== null" class="compass-correction">{{ t('compass.correctionActive') }}</p>
+      </div>
+      <section v-if="calibrationOpen" id="compass-calibration" class="compass-calibration" aria-labelledby="compass-calibration-title">
+        <h2 id="compass-calibration-title">{{ t('compass.calibrationTitle') }}</h2>
+        <ol><li>{{ t('compass.calibrationStep1') }}</li><li>{{ t('compass.calibrationStep2') }}</li><li>{{ t('compass.calibrationStep3') }}</li></ol>
+        <button type="button" class="secondary-button compass-restart" @click="restart">{{ t('compass.restart') }}</button>
+        <h3>{{ t('compass.manualTitle') }}</h3>
+        <p>{{ t('compass.manualHint') }}</p>
+        <div class="scanner-controls">
+          <button type="button" class="secondary-button compass-align" :disabled="heading === null || state !== 'active'" @click="alignNorth">{{ t('compass.align') }}</button>
+          <button v-if="correction !== null" type="button" class="secondary-button compass-reset-correction" @click="resetCorrection">{{ t('compass.resetCorrection') }}</button>
+        </div>
+      </section>
       <p class="qr-local-note">{{ t('compass.hint') }}</p>
     </section>
   </template>

@@ -32,6 +32,12 @@ Přístup k senzorům začíná až po kliknutí. Prohlížeče poskytující `D
 
 Kompas funguje v uložené offline PWA, pokud zařízení a prohlížeč podporují potřebné senzory. Přesnost i reference severu (magnetický nebo skutečný) závisejí na zařízení; aplikace nepočítá magnetickou deklinaci. Blízké kovy a magnety mohou měření rušit. Fyzické ověření na Androidu a iPhonu je ještě potřeba.
 
+Zobrazení počká 1,5 sekundy po prvním použitelném vzorku a potom vyhlazuje úhly po kratším oblouku i přes přechod severu. Každé měření zachovává jediný zdroj událostí, aby mezi nimi nepřeskakovalo. Tato opatření omezují chvění zobrazení, ale neopravují chybnou referenci severu. Orientaci kompasu dodává telefon a operační systém, obvykle kombinací magnetometru, akcelerometru a gyroskopu; aplikace nepoužívá GPS. Samotná GPS poloha stojícího telefonu neurčí, kam je natočený.
+
+**Kalibrace a přesnost** zobrazuje skutečný zdroj událostí, hlášenou přesnost směru, je-li dostupná, a pokyny k omezení magnetického rušení a pomoci systému s kalibrací senzorů. Údaje Safari s hlášenou nejistotou přes 20 stupňů nebo zápornou přesností se nezobrazí; náklon přes 20 stupňů vyžaduje srovnání telefonu. Android přes tyto události obvykle odhad přesnosti neposkytuje, což je výslovně uvedeno místo odvozování z klidného azimutu. JavaScript v prohlížeči nemá standardní příkaz ke spuštění hardwarové kalibrace kompasu.
+
+Máte-li známou referenci severu, tlačítko **Tento směr je sever** nastaví viditelnou ruční úhlovou korekci poté, co horní hranu obrazovky namíříte na sever určený nezávisle. Je to korekce natočení, nikoli kalibrace senzoru nebo automatické nalezení severu. Lze ji zrušit a vždy se odstraní při zastavení, novém spuštění, pozastavení nebo opuštění nástroje. **Znovu načíst směr** spustí nové měření a korekci smaže. Chybně zvolená reference způsobí chybný směr; žádná korekce se mezi spuštěními neukládá.
+
 ## Vodováha
 
 Otevřete čtvrtou dlaždici nebo `#/level` a zvolte **Spustit vodováhu**. Režim **Naplocho** slouží k položení telefonu displejem vzhůru na plochu. Nativní orientační senzory poskytují dva úhly náklonu v souřadnicích obrazovky, zobrazené na jedno desetinné místo, a bublinu pohybující se k vyšší hraně. Zelená bublina značí odchylku obou os nejvýše 0,5 stupně od reference. Bublina dosáhne kruhového limitu pohybu při celkovém náklonu 10 stupňů; číselné úhly dál zobrazují i větší náklony. V režimu naplocho téměř svislá poloha a telefon displejem dolů zobrazují pokyny k položení místo zavádějící roviny.
