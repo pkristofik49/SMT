@@ -18,6 +18,7 @@
   <script defer src="js/qr-reader.js"></script>
   <script defer src="js/pdf-viewer.js"></script>
   <script defer src="js/compass.js"></script>
+  <script defer src="js/level.js"></script>
   <script defer src="js/app.js"></script>
   <script defer src="js/pwa.js"></script>
 </head>
@@ -74,7 +75,8 @@
       </template>
       <qr-reader v-else-if="page === 'qr'" :t="t"></qr-reader>
       <pdf-viewer v-else-if="page === 'pdf'" :t="t"></pdf-viewer>
-      <compass-tool v-else :t="t"></compass-tool>
+      <compass-tool v-else-if="page === 'compass'" :t="t"></compass-tool>
+      <level-tool v-else :t="t"></level-tool>
     </main>
 
     <footer class="site-footer"><span>SMT · {{ version }}</span></footer>
@@ -170,6 +172,34 @@
         <button v-else type="button" class="primary-button compass-start" @click="start">{{ t('compass.start') }}</button>
       </div>
       <p class="qr-local-note">{{ t('compass.hint') }}</p>
+    </section>
+  </template>
+  <template id="level-template">
+    <section class="level-page" aria-labelledby="level-title">
+      <a class="back-link" href="#/">← {{ t('level.back') }}</a>
+      <div class="qr-heading">
+        <span class="eyebrow">{{ t('tool.level.category') }}</span>
+        <h1 id="level-title">{{ t('tool.level.name') }}</h1>
+        <p>{{ t('level.intro') }}</p>
+      </div>
+      <div class="level-surface" :class="{ 'level-balanced': isLevel, 'level-inactive': !tilt }" aria-hidden="true">
+        <div class="level-crosshair"></div>
+        <div class="level-target"></div>
+        <div class="level-bubble" :style="bubbleStyle"></div>
+      </div>
+      <div class="level-readings">
+        <div><span>{{ t('level.axisX') }}</span><strong class="level-x">{{ formatAngle(tilt?.x) }}°</strong></div>
+        <div><span>{{ t('level.axisY') }}</span><strong class="level-y">{{ formatAngle(tilt?.y) }}°</strong></div>
+      </div>
+      <p class="level-status" role="status">{{ t(state === 'active' ? (isLevel ? 'level.balanced' : 'level.tilted') : 'level.state.' + state) }}</p>
+      <div class="scanner-controls level-controls">
+        <button v-if="running" type="button" class="secondary-button level-stop" @click="stop">{{ t('level.stop') }}</button>
+        <button v-else type="button" class="primary-button level-start" @click="start">{{ t('level.start') }}</button>
+        <button type="button" class="secondary-button level-calibrate" :disabled="!tilt" @click="calibrate">{{ t('level.calibrate') }}</button>
+        <button v-if="reference" type="button" class="secondary-button level-reset" @click="resetCalibration">{{ t('level.reset') }}</button>
+      </div>
+      <p v-if="reference" class="level-calibrated">{{ t('level.calibrated') }}</p>
+      <p class="qr-local-note">{{ t('level.hint') }}</p>
     </section>
   </template>
 </body>

@@ -1,4 +1,4 @@
-param([int]$Port = 8766, [int]$DebugPort = 9224, [string]$BasePath = '/SMT/', [ValidateSet('pwa.html', 'qr.html', 'pdf.html', 'compass.html')][string]$TestPage = 'pwa.html')
+param([int]$Port = 8766, [int]$DebugPort = 9224, [string]$BasePath = '/SMT/', [ValidateSet('pwa.html', 'qr.html', 'pdf.html', 'compass.html', 'level.html')][string]$TestPage = 'pwa.html')
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $profile = Join-Path $root ('.browser-pwa-' + [DateTime]::UtcNow.Ticks)

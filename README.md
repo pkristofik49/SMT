@@ -4,7 +4,7 @@ Small tools — everyday utilities
 
 [Czech version](README_CZ.md) · [Live application](https://pkristofik49.github.io/SMT/)
 
-A Vue SPA with a two-column tool menu (one column on mobile). The first three working tools are a QR reader, a local PDF viewer, and a compass; six placeholder cards cover text, JSON, unit conversions, colours, dates, and passwords. Search matches names, categories, and descriptions regardless of case and Czech diacritics, and offers a reset when nothing matches.
+A Vue SPA with a two-column tool menu (one column on mobile). The first four working tools are a QR reader, a local PDF viewer, a compass, and a spirit level; six placeholder cards cover text, JSON, unit conversions, colours, dates, and passwords. Search matches names, categories, and descriptions regardless of case and Czech diacritics, and offers a reset when nothing matches.
 
 ## QR reader
 
@@ -32,6 +32,14 @@ Sensor access starts only after a click. Browsers exposing `DeviceOrientationEve
 
 The compass works in the cached offline PWA when device and browser sensor support are available. Accuracy and the north reference (magnetic or true) depend on the device; the app does not calculate magnetic declination. Nearby metals and magnets can interfere. Physical Android and iPhone checks are still required.
 
+## Spirit level
+
+Open the fourth tile or `#/level`, select **Start level**, and place the phone screen-up on the surface. The native orientation sensors provide two tilt angles in screen coordinates, displayed to one decimal place, and a bubble moving towards the higher edge. A green bubble indicates both axes are within 0.5 degrees of the reference. The bubble reaches its circular travel limit at a combined tilt of 10 degrees; the numeric angles continue to show larger tilts. Near-vertical and face-down positions show positioning guidance instead of a misleading level reading.
+
+**Set zero** uses the current surface as the reference; calibrate on a known level surface. **Reset calibration** restores the device reference. Calibration is kept when stopping and restarting within the tool, transforms with screen rotation, and is discarded when leaving the tool. Native orientation permission is requested only after a click, without requesting absolute/magnetometer access. Relative orientation data suffices; heading and geolocation are not needed. Stopping, leaving, or hiding the page removes listeners and clears readings. Missing data times out after eight seconds; unavailable APIs and denied permission have explanatory messages.
+
+The tool works in the cached offline PWA on supported phones over HTTPS or localhost, with no extra library or uploaded data. Device sensors, phone cases, and uneven backs can affect accuracy. Software tests use simulated sensors; physical-device accuracy still needs checking.
+
 ## Running
 
 Open `index.html` in a current browser or serve the project directory with an existing static HTTP server, such as IIS. Classic deferred scripts and relative paths support both local files and `/SMT/` on GitHub Pages. No package manager, build step, Node.js, router, or UI library is needed.
@@ -44,7 +52,7 @@ Use the ordinary website or open [Small Tools](https://pkristofik49.github.io/SM
 
 `manifest.webmanifest` defines a relative app ID, start URL, and scope, working both under `/SMT/` and at a local HTTP server root. Local PNG icons include 192 and 512 px application icons, a maskable 512 px icon, and a 180 px Apple touch icon. `scripts/generate-icons.ps1` reproduces them from the existing grid mark using Windows System.Drawing without additional dependencies.
 
-`js/pwa.js` registers `sw.js` after page load. Service workers require HTTPS in production or localhost for development. Direct file previews still work as ordinary web pages but cannot register a worker or install offline support. After the worker finishes its first complete installation, the menu, search, QR reader, PDF viewer, compass, translations, styles, and icons work offline, including after closing and reopening the app. The other tools remain placeholders. PWA installation is optional for caching. Clearing browser site data or browser storage eviction can remove cached files; open the website online again to restore them.
+`js/pwa.js` registers `sw.js` after page load. Service workers require HTTPS in production or localhost for development. Direct file previews still work as ordinary web pages but cannot register a worker or install offline support. After the worker finishes its first complete installation, the menu, search, QR reader, PDF viewer, compass, spirit level, translations, styles, and icons work offline, including after closing and reopening the app. The other tools remain placeholders. PWA installation is optional for caching. Clearing browser site data or browser storage eviction can remove cached files; open the website online again to restore them.
 
 Every release precaches the whole application shell. An incomplete download fails installation and preserves the running release. A complete update waits until all browser tabs and app windows using the previous worker close, then activates on reopening. There is no forced reload or `skipWaiting()`. Returning to a visible app or reconnecting checks for updates. Cache cleanup affects only this application's old releases within its scope. Keep new runtime assets in `SHELL` and keep the worker's `RELEASE` identical to the application version.
 
@@ -57,6 +65,7 @@ js/app.js                    State, tool catalogue, search, and icons
 js/qr-reader.js              Native camera and QR-reader component
 js/pdf-viewer.js             Native local PDF-viewer component
 js/compass.js                Native sensor compass component
+js/level.js                  Two-axis native spirit level and calibration
 js/translations.js           Localized application text (Czech)
 js/version.js                Application version
 js/pwa.js                    Service-worker registration and update checks
@@ -71,6 +80,7 @@ tests/ui.html                Browser integration tests
 tests/qr.html                QR-reader lifecycle integration tests
 tests/pdf.html               PDF selection and lifecycle tests
 tests/compass.html           Compass heading and permission tests
+tests/level.html             Spirit level, calibration, and lifecycle tests
 tests/versioning.ps1         Isolated version-hook tests
 tests/pwa.html               Offline and update integration tests
 tests/serve-pwa.ps1          Local PWA test server
@@ -114,6 +124,8 @@ With the same test server running, execute `powershell -NoProfile -ExecutionPoli
 Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage pdf.html` to test a generated valid single-page PDF, local file bytes and MIME type, viewer and fallback links, invalid selections, repeated selection, cancellation, responsive layout, and temporary-URL cleanup. Native PDF rendering controls are supplied by the browser.
 
 Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage compass.html` for simulated orientation-event tests: permission denial, cardinal headings, Safari heading and accuracy, relative-data rejection, screen rotation, tilt, missing data, cancellation, pause, and navigation cleanup. These tests verify software behavior, not physical sensor accuracy.
+
+Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage level.html` for simulated two-axis readings, bubble direction and limits, calibration and reset, rotation of readings and reference, half-degree tolerance, face-down rejection, permission handling, missing data, and lifecycle cleanup.
 
 ## GitHub Pages
 
