@@ -180,18 +180,23 @@
       <div class="qr-heading">
         <span class="eyebrow">{{ t('tool.level.category') }}</span>
         <h1 id="level-title">{{ t('tool.level.name') }}</h1>
-        <p>{{ t('level.intro') }}</p>
+        <p>{{ t(mode === 'edge' ? 'level.edgeIntro' : 'level.intro') }}</p>
       </div>
-      <div class="level-surface" :class="{ 'level-balanced': isLevel, 'level-inactive': !tilt }" aria-hidden="true">
+      <div class="level-mode-controls" role="group" :aria-label="t('level.mode')">
+        <button type="button" class="secondary-button level-mode-flat" :aria-pressed="mode === 'flat'" @click="setMode('flat')">{{ t('level.modeFlat') }}</button>
+        <button type="button" class="secondary-button level-mode-edge" :aria-pressed="mode === 'edge'" @click="setMode('edge')">{{ t('level.modeEdge') }}</button>
+      </div>
+      <div class="level-surface" :class="{ 'level-balanced': isLevel, 'level-inactive': !tilt, 'level-edge': mode === 'edge', 'level-edge-horizontal': mode === 'edge' && edgeHorizontal }" aria-hidden="true">
         <div class="level-crosshair"></div>
         <div class="level-target"></div>
         <div class="level-bubble" :style="bubbleStyle"></div>
       </div>
-      <div class="level-readings">
+      <div v-if="mode === 'flat'" class="level-readings">
         <div><span>{{ t('level.axisX') }}</span><strong class="level-x">{{ formatAngle(tilt?.x) }}°</strong></div>
         <div><span>{{ t('level.axisY') }}</span><strong class="level-y">{{ formatAngle(tilt?.y) }}°</strong></div>
       </div>
-      <p class="level-status" role="status">{{ t(state === 'active' ? (isLevel ? 'level.balanced' : 'level.tilted') : 'level.state.' + state) }}</p>
+      <div v-else class="level-readings level-single"><div><span>{{ t('level.edgeAxis') }}</span><strong class="level-edge-angle">{{ formatAngle(tilt?.y) }}°</strong></div></div>
+      <p class="level-status" role="status">{{ t(state === 'active' ? (mode === 'edge' ? (isLevel ? 'level.edgeBalanced' : 'level.edgeTilted') : (isLevel ? 'level.balanced' : 'level.tilted')) : 'level.state.' + state) }}</p>
       <div class="scanner-controls level-controls">
         <button v-if="running" type="button" class="secondary-button level-stop" @click="stop">{{ t('level.stop') }}</button>
         <button v-else type="button" class="primary-button level-start" @click="start">{{ t('level.start') }}</button>

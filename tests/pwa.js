@@ -79,6 +79,9 @@
     frame.contentDocument.querySelector('a[href="#/level"]').click();
     await until(() => frame.contentDocument.querySelector('.level-page'));
     check('The spirit level opens offline without automatically requesting sensors', !!frame.contentDocument.querySelector('.level-start') && frame.contentDocument.querySelector('.level-x').textContent === '—°');
+    frame.contentDocument.querySelector('.level-mode-edge').click();
+    await until(() => frame.contentDocument.querySelector('.level-edge-angle'));
+    check('The long-edge level mode is available offline', frame.contentDocument.querySelector('.level-mode-edge').getAttribute('aria-pressed') === 'true');
     frame.contentDocument.querySelector('.back-link').click();
     await until(() => frame.contentDocument.querySelectorAll('.tool-card').length === 10);
     for (const resource of resources) {
