@@ -15,7 +15,7 @@
     throw new Error('Timed out waiting for compass state');
   }
   try {
-    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 10);
+    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 4);
     const win = frame.contentWindow;
     const doc = frame.contentDocument;
     for (const registration of await win.navigator.serviceWorker.getRegistrations()) await registration.unregister();
@@ -147,7 +147,7 @@
     doc.querySelector('.compass-start').click();
     await until(() => status() === text('state.waiting'));
     doc.querySelector('.back-link').click();
-    await until(() => doc.querySelectorAll('.tool-card').length === 10);
+    await until(() => doc.querySelectorAll('.tool-card').length === 4);
     emit({ alpha: 0, absolute: true });
     win.location.hash = '#/compass';
     await until(() => doc.querySelector('.compass-page'));

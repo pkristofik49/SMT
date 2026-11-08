@@ -4,7 +4,7 @@ Small tools — malé nástroje pro každý den
 
 [English version](README.md) · [Živá aplikace](https://pkristofik49.github.io/SMT/)
 
-Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvními čtyřmi funkčními nástroji jsou čtečka QR kódů, místní prohlížeč PDF, kompas a vodováha; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Menu obsahuje pouze čtyři implementované nástroje: čtečku QR kódů, místní prohlížeč PDF, kompas a vodováhu. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
 
 ## Čtečka QR kódů
 
@@ -60,7 +60,7 @@ Použijte běžný web, nebo otevřete [Small Tools](https://pkristofik49.github
 
 `manifest.webmanifest` definuje relativní ID aplikace, startovací URL a rozsah; funguje pod `/SMT/` i v kořeni místního HTTP serveru. Místní PNG ikony zahrnují aplikační ikony 192 a 512 px, maskovatelnou ikonu 512 px a Apple touch ikonu 180 px. `scripts/generate-icons.ps1` je reprodukuje podle stávající značky s mřížkou pomocí Windows System.Drawing bez dalších závislostí.
 
-`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, kompas, vodováha, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
+`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, kompas, vodováha, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
 
 Každá verze předem uloží všechny soubory aplikace. Neúplné stažení přeruší instalaci a zachová běžící verzi. Úplná aktualizace čeká na zavření všech karet prohlížeče a oken aplikace používajících předchozí worker; po opětovném otevření se aktivuje. Nedochází k vynucenému obnovení ani `skipWaiting()`. Návrat do viditelné aplikace nebo obnovení připojení ověří aktualizace. Úklid cache se týká pouze starých verzí této aplikace v jejím rozsahu. Nové soubory potřebné za běhu přidávejte do `SHELL` a `RELEASE` workeru udržujte shodný s verzí aplikace.
 

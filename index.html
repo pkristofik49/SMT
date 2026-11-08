@@ -55,12 +55,11 @@
           <article v-for="tool in filteredTools" :key="tool.id" class="tool-card" :class="tool.color" :aria-labelledby="`title-${tool.id}`">
             <div class="card-top">
               <span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path v-for="(path, index) in icons[tool.icon]" :key="index" :d="path" /></svg></span>
-              <span v-if="tool.href" class="available-tool">{{ t('tools.open') }} ↗</span>
-              <span v-else class="coming-soon">{{ t('tools.comingSoon') }}</span>
+              <span class="available-tool">{{ t('tools.open') }} ↗</span>
             </div>
             <div class="card-copy">
               <span class="category">{{ tool.category }}</span>
-              <h3 :id="`title-${tool.id}`"><a v-if="tool.href" class="tool-link" :href="tool.href">{{ tool.name }}</a><template v-else>{{ tool.name }}</template></h3>
+              <h3 :id="`title-${tool.id}`"><a class="tool-link" :href="tool.href">{{ tool.name }}</a></h3>
               <p>{{ tool.description }}</p>
             </div>
           </article>

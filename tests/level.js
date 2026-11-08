@@ -15,7 +15,7 @@
     throw new Error('Timed out waiting for spirit level state');
   }
   try {
-    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 10);
+    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 4);
     const win = frame.contentWindow;
     const doc = frame.contentDocument;
     for (const registration of await win.navigator.serviceWorker.getRegistrations()) await registration.unregister();
@@ -189,7 +189,7 @@
     await pause();
     doc.querySelector('.level-calibrate').click();
     doc.querySelector('.back-link').click();
-    await until(() => doc.querySelectorAll('.tool-card').length === 10);
+    await until(() => doc.querySelectorAll('.tool-card').length === 4);
     win.location.hash = '#/level';
     await until(() => doc.querySelector('.level-page'));
     emit(0, 0);
