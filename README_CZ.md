@@ -4,7 +4,7 @@ Small tools — malé nástroje pro každý den
 
 [English version](README.md) · [Živá aplikace](https://pkristofik49.github.io/SMT/)
 
-Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvními dvěma funkčními nástroji jsou čtečka QR kódů a místní prohlížeč PDF; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Prvními třemi funkčními nástroji jsou čtečka QR kódů, místní prohlížeč PDF a kompas; šest připravovaných dlaždic pokrývá text, JSON, převody jednotek, barvy, data a hesla. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
 
 ## Čtečka QR kódů
 
@@ -24,6 +24,14 @@ Otevřete druhou dlaždici nebo `#/pdf-viewer` a zvolte **Vybrat PDF**. Dokument
 
 Aplikace ověřuje hlavičku PDF v prvních 1024 bajtech; tím rozpozná formát, ale neověřuje celý dokument. Neplatný výběr zobrazí chybu a zachová předchozí dokument. Stejný soubor lze vybrat znovu, zrušení výběru ponechá aktuální dokument a zavření nebo opuštění nástroje uvolní jeho dočasnou URL. Soubory se neukládají do cache PWA ani úložiště prohlížeče a po obnovení stránky je potřeba je vybrat znovu. Samotný nástroj se ukládá pro offline použití.
 
+## Kompas
+
+Otevřete třetí dlaždici nebo `#/compass` a zvolte **Spustit kompas**. Telefon držte vodorovně displejem vzhůru. Kompas zobrazuje azimut horní hrany aktuální obrazovky a osm pojmenovaných hlavních a vedlejších světových stran. Ciferník se otáčí k severu se zohledněním otočení obrazovky. Aplikace používá nativní orientační události bez další knihovny a bez žádosti o polohu; údaje senzorů se nikam neodesílají ani neukládají.
+
+Přístup k senzorům začíná až po kliknutí. Prohlížeče poskytující `DeviceOrientationEvent.requestPermission` jsou požádány o absolutní orientaci včetně přístupu k magnetometru, kde je podporovaný. Safari využívá `webkitCompassHeading`; ostatní prohlížeče musí poskytnout absolutní orientační úhly. Relativní úhly gyroskopu nikdy nenahrazují směr vůči severu. Vyžaduje se HTTPS nebo localhost a kompatibilní zařízení s odpovídajícími senzory. Při chybějících absolutních údajích se po osmi sekundách zobrazí možnost opakování. Nízká přesnost kompasu Safari a nakloněný telefon zobrazují pokyny ke kalibraci nebo srovnání místo azimutu. Obsluha senzorů se odpojí při zastavení, navigaci a skrytí aplikace; pokračování vyžaduje nové spuštění.
+
+Kompas funguje v uložené offline PWA, pokud zařízení a prohlížeč podporují potřebné senzory. Přesnost i reference severu (magnetický nebo skutečný) závisejí na zařízení; aplikace nepočítá magnetickou deklinaci. Blízké kovy a magnety mohou měření rušit. Fyzické ověření na Androidu a iPhonu je ještě potřeba.
+
 ## Spuštění
 
 Otevřete `index.html` v aktuálním prohlížeči nebo adresář projektu zpřístupněte stávajícím statickým HTTP serverem, například IIS. Klasické odložené skripty a relativní cesty podporují místní soubory i `/SMT/` na GitHub Pages. Není potřeba správce balíčků, sestavování, Node.js, router ani knihovna uživatelského rozhraní.
@@ -36,7 +44,7 @@ Použijte běžný web, nebo otevřete [Small Tools](https://pkristofik49.github
 
 `manifest.webmanifest` definuje relativní ID aplikace, startovací URL a rozsah; funguje pod `/SMT/` i v kořeni místního HTTP serveru. Místní PNG ikony zahrnují aplikační ikony 192 a 512 px, maskovatelnou ikonu 512 px a Apple touch ikonu 180 px. `scripts/generate-icons.ps1` je reprodukuje podle stávající značky s mřížkou pomocí Windows System.Drawing bez dalších závislostí.
 
-`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
+`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, kompas, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Ostatní nástroje zůstávají připravované. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
 
 Každá verze předem uloží všechny soubory aplikace. Neúplné stažení přeruší instalaci a zachová běžící verzi. Úplná aktualizace čeká na zavření všech karet prohlížeče a oken aplikace používajících předchozí worker; po opětovném otevření se aktivuje. Nedochází k vynucenému obnovení ani `skipWaiting()`. Návrat do viditelné aplikace nebo obnovení připojení ověří aktualizace. Úklid cache se týká pouze starých verzí této aplikace v jejím rozsahu. Nové soubory potřebné za běhu přidávejte do `SHELL` a `RELEASE` workeru udržujte shodný s verzí aplikace.
 
@@ -48,6 +56,7 @@ styles.css                   Responzivní vzhled
 js/app.js                    Stav, katalog nástrojů, hledání a ikony
 js/qr-reader.js              Komponenta nativní kamery a čtečky QR
 js/pdf-viewer.js             Komponenta nativního prohlížeče místních PDF
+js/compass.js                Komponenta kompasu s nativními senzory
 js/translations.js           Lokalizované texty aplikace (čeština)
 js/version.js                Verze aplikace
 js/pwa.js                    Registrace service workeru a kontroly aktualizací
@@ -61,6 +70,7 @@ scripts/generate-icons.ps1   Reprodukovatelné instalační ikony
 tests/ui.html                Integrační testy v prohlížeči
 tests/qr.html                Integrační testy životního cyklu čtečky QR
 tests/pdf.html               Testy výběru PDF a životního cyklu dokumentu
+tests/compass.html           Testy azimutu a oprávnění kompasu
 tests/versioning.ps1         Oddělené testy verzovacího hooku
 tests/pwa.html               Integrační testy offline provozu a aktualizací
 tests/serve-pwa.ps1          Místní server testů PWA
@@ -102,6 +112,8 @@ Testy PWA pokrývají manifest, skutečné rozměry ikon, úplné přednačtení
 Při běžícím stejném testovacím serveru spusťte `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage qr.html` pro ověření čtečky se simulovanými streamy kamery a simulovaným detektorem. Testy pokrývají nepodporovaný prohlížeč, odmítnutí přístupu, textové i prázdné výsledky, zrušení, navigaci a opožděné asynchronní výsledky. Neověřují optické dekódování přes fyzickou kameru mobilu; to otestujte ručně na podporovaném telefonu.
 
 Příkazem `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage pdf.html` ověříte vygenerované platné jednostránkové PDF, místní obsah a MIME typ, náhled i náhradní odkazy, neplatný výběr, opakovaný výběr, zrušení, responzivní rozložení a uvolňování dočasných URL. Ovládání nativního vykreslení PDF dodává prohlížeč.
+
+Příkaz `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage compass.html` spouští simulované testy orientačních událostí: odmítnutí oprávnění, světové strany, směr a přesnost Safari, odmítnutí relativních dat, otočení obrazovky, náklon, chybějící data, zrušení, pozastavení a úklid při navigaci. Testy ověřují chování programu, nikoli přesnost fyzických senzorů.
 
 ## GitHub Pages
 

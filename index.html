@@ -17,6 +17,7 @@
   <script defer src="js/version.js"></script>
   <script defer src="js/qr-reader.js"></script>
   <script defer src="js/pdf-viewer.js"></script>
+  <script defer src="js/compass.js"></script>
   <script defer src="js/app.js"></script>
   <script defer src="js/pwa.js"></script>
 </head>
@@ -72,7 +73,8 @@
       </section>
       </template>
       <qr-reader v-else-if="page === 'qr'" :t="t"></qr-reader>
-      <pdf-viewer v-else :t="t"></pdf-viewer>
+      <pdf-viewer v-else-if="page === 'pdf'" :t="t"></pdf-viewer>
+      <compass-tool v-else :t="t"></compass-tool>
     </main>
 
     <footer class="site-footer"><span>SMT · {{ version }}</span></footer>
@@ -137,6 +139,37 @@
       </div>
       <div v-else-if="!loading" class="pdf-empty"><span aria-hidden="true">▤</span><p>{{ t('pdf.empty') }}</p></div>
       <p class="qr-local-note">{{ t('pdf.localNote') }}</p>
+    </section>
+  </template>
+  <template id="compass-template">
+    <section class="compass-page" aria-labelledby="compass-title">
+      <a class="back-link" href="#/">← {{ t('compass.back') }}</a>
+      <div class="qr-heading">
+        <span class="eyebrow">{{ t('tool.compass.category') }}</span>
+        <h1 id="compass-title">{{ t('tool.compass.name') }}</h1>
+        <p>{{ t('compass.intro') }}</p>
+      </div>
+      <div class="compass-dial" :class="{ 'compass-inactive': heading === null }" :style="{ '--heading': (heading ?? 0) + 'deg' }" aria-hidden="true">
+        <div class="compass-marker"></div>
+        <div class="compass-rose">
+          <span class="compass-label compass-north">{{ t('compass.short.n') }}</span>
+          <span class="compass-label compass-east">{{ t('compass.short.e') }}</span>
+          <span class="compass-label compass-south">{{ t('compass.short.s') }}</span>
+          <span class="compass-label compass-west">{{ t('compass.short.w') }}</span>
+          <div class="compass-needle"></div>
+          <div class="compass-pin"></div>
+        </div>
+      </div>
+      <div class="compass-readout">
+        <div class="compass-degrees" :aria-label="t('compass.heading')">{{ degrees === null ? '—' : degrees }}°</div>
+        <p class="compass-direction">{{ direction ? t('compass.direction.' + direction) : t('compass.noHeading') }}</p>
+      </div>
+      <p class="compass-status" role="status">{{ t('compass.state.' + state) }}</p>
+      <div class="scanner-controls compass-controls">
+        <button v-if="running" type="button" class="secondary-button compass-stop" @click="stop">{{ t('compass.stop') }}</button>
+        <button v-else type="button" class="primary-button compass-start" @click="start">{{ t('compass.start') }}</button>
+      </div>
+      <p class="qr-local-note">{{ t('compass.hint') }}</p>
     </section>
   </template>
 </body>

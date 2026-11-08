@@ -35,7 +35,7 @@
     return pdf + `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   };
   try {
-    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 8);
+    await until(() => frame.contentDocument?.querySelectorAll('.tool-card').length === 9);
     const doc = frame.contentDocument;
     const win = frame.contentWindow;
     for (const registration of await win.navigator.serviceWorker.getRegistrations()) await registration.unregister();
@@ -93,7 +93,7 @@
     select(file);
     await until(() => doc.querySelector('.pdf-preview'));
     doc.querySelector('.back-link').click();
-    await until(() => doc.querySelectorAll('.tool-card').length === 8);
+    await until(() => doc.querySelectorAll('.tool-card').length === 9);
     check(urls.size === 0, 'Returning to the menu releases the selected document');
     Object.defineProperty(win.navigator, 'pdfViewerEnabled', { configurable: true, value: false });
     win.location.hash = '#/pdf-viewer';
@@ -102,7 +102,7 @@
     await until(() => doc.querySelector('.pdf-open'));
     check(!doc.querySelector('.pdf-preview') && !!doc.querySelector('.pdf-download'), 'Browsers without embedded PDF support receive open and download alternatives');
     doc.querySelector('.back-link').click();
-    await until(() => doc.querySelectorAll('.tool-card').length === 8);
+    await until(() => doc.querySelectorAll('.tool-card').length === 9);
     check(urls.size === 0, 'Fallback viewing also cleans up temporary URLs');
     lines.push('\nALL TESTS PASSED');
   } catch (error) {
