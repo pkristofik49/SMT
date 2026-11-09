@@ -1,18 +1,19 @@
-/* global Vue, SmallToolsTranslations, SmallToolsVersion, SmallToolsQrReader, SmallToolsPdfViewer, SmallToolsCompass, SmallToolsLevel */
+/* global Vue, SmallToolsTranslations, SmallToolsVersion, SmallToolsQrReader, SmallToolsPdfViewer, SmallToolsCompass, SmallToolsLevel, SmallToolsPhotoMetadata */
 Vue.createApp({
-  components: { QrReader: SmallToolsQrReader, PdfViewer: SmallToolsPdfViewer, CompassTool: SmallToolsCompass, LevelTool: SmallToolsLevel },
+  components: { QrReader: SmallToolsQrReader, PdfViewer: SmallToolsPdfViewer, CompassTool: SmallToolsCompass, LevelTool: SmallToolsLevel, PhotoMetadata: SmallToolsPhotoMetadata },
   setup() {
     const { computed, ref, onBeforeUnmount } = Vue
 
     const query = ref('')
     const t = (key) => SmallToolsTranslations.cs[key] ?? key
-    const routes = { '#/qr-reader': 'qr', '#/pdf-viewer': 'pdf', '#/compass': 'compass', '#/level': 'level' }
+    const routes = { '#/qr-reader': 'qr', '#/pdf-viewer': 'pdf', '#/compass': 'compass', '#/level': 'level', '#/photo-metadata': 'metadata' }
     const page = ref(routes[location.hash] || 'menu')
     const tools = [
       { id: 'qr', icon: 'qr', color: 'green', href: '#/qr-reader' },
       { id: 'pdf', icon: 'file', color: 'blue', href: '#/pdf-viewer' },
       { id: 'compass', icon: 'compass', color: 'orange', href: '#/compass' },
       { id: 'level', icon: 'level', color: 'green', href: '#/level' },
+      { id: 'metadata', icon: 'photo', color: 'blue', href: '#/photo-metadata' },
     ].map((tool) => ({
       ...tool,
       name: t('tool.' + tool.id + '.name'),
@@ -27,6 +28,7 @@ Vue.createApp({
     })
 
     const icons = {
+      photo: ['M4 4h16v16H4Z', 'm4 16 5-5 4 4 3-3 4 4M8 8h.01'],
       level: ['M3 7h18v10H3Z', 'M9 7v10m6-10v10M12 10v4'],
       compass: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z', 'm16 8-3 5-5 3 3-5Z'],
       file: ['M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z', 'M14 3v6h6M8 13h8M8 17h6'],
@@ -35,7 +37,7 @@ Vue.createApp({
 
     const updatePage = () => {
       page.value = routes[location.hash] || 'menu'
-      document.title = t({ qr: 'qr.pageTitle', pdf: 'pdf.pageTitle', compass: 'compass.pageTitle', level: 'level.pageTitle', menu: 'page.title' }[page.value])
+      document.title = t({ qr: 'qr.pageTitle', pdf: 'pdf.pageTitle', compass: 'compass.pageTitle', level: 'level.pageTitle', metadata: 'metadata.pageTitle', menu: 'page.title' }[page.value])
     }
     updatePage()
     window.addEventListener('hashchange', updatePage)

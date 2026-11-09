@@ -1,13 +1,13 @@
 'use strict';
 
 // The pre-commit hook keeps the cache release aligned with the application version.
-const RELEASE = '1.010';
+const RELEASE = '1.011';
 const CACHE_PREFIX = `small-tools:${self.registration.scope}:`;
 const CACHE_NAME = `${CACHE_PREFIX}${RELEASE}`;
 const appUrl = path => new URL(path, self.registration.scope).href;
 const SHELL = [
   './index.html', './styles.css', './manifest.webmanifest',
-  './vendor/vue.global.prod.js', './js/translations.js', './js/version.js', './js/qr-reader.js', './js/pdf-viewer.js', './js/compass.js', './js/level.js', './js/app.js', './js/pwa.js',
+  './vendor/vue.global.prod.js', './vendor/exifr-7.1.3.umd.js', './js/translations.js', './js/version.js', './js/qr-reader.js', './js/pdf-viewer.js', './js/compass.js', './js/level.js', './js/photo-metadata.js', './js/app.js', './js/pwa.js',
   './icons/favicon.svg', './icons/icon-192.png', './icons/icon-512.png',
   './icons/maskable-512.png', './icons/apple-touch-icon.png'
 ].map(appUrl);

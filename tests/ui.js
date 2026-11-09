@@ -25,7 +25,7 @@
       search.dispatchEvent(new win.Event('input', { bubbles: true }));
       await settle();
     };
-    assert(cards().length === 4 && doc.querySelector('a[href="#/qr-reader"]') && doc.querySelector('a[href="#/pdf-viewer"]') && doc.querySelector('a[href="#/compass"]') && doc.querySelector('a[href="#/level"]'), 'Only the four implemented tools render');
+    assert(cards().length === 5 && doc.querySelector('a[href="#/qr-reader"]') && doc.querySelector('a[href="#/pdf-viewer"]') && doc.querySelector('a[href="#/compass"]') && doc.querySelector('a[href="#/level"]') && doc.querySelector('a[href="#/photo-metadata"]'), 'Only the five implemented tools render');
     assert(!doc.querySelector('[v-cloak]'), 'Vue mounts the classic-script template');
     assert(doc.title === win.SmallToolsTranslations.cs['page.title'], 'Page metadata uses translations');
     assert(doc.querySelector('.site-footer').textContent.trim() === 'SMT · ' + win.SmallToolsVersion, 'Footer displays the application version');
@@ -41,7 +41,7 @@
     assert(cards().length === 0 && doc.querySelector('.empty-state'), 'An empty search provides feedback');
     doc.querySelector('.empty-state button').click();
     await settle();
-    assert(cards().length === 4 && search.value === '', 'Reset restores the complete menu');
+    assert(cards().length === 5 && search.value === '', 'Reset restores the complete menu');
     for (const width of [320, 960]) {
       frame.width = width;
       await settle();

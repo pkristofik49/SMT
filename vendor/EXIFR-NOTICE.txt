@@ -1,0 +1,8 @@
+exifr 7.1.3 (full UMD browser distribution)
+Source: https://github.com/MikeKovarik/exifr
+Release: https://github.com/MikeKovarik/exifr/releases/tag/v7.1.3
+Package: https://registry.npmjs.org/exifr/-/exifr-7.1.3.tgz
+The package SHA-512 integrity was verified against the npm registry before copying dist/full.umd.js.
+License: MIT; see EXIFR-LICENSE.
+The user explicitly approved this dependency for local, offline photo metadata reading.
+Distribution SHA-256: 2bd05117781c12ddd965dee846de3b3f986b5ecb4c7f6a78f2d2ec1db7c65ae7

@@ -19,6 +19,8 @@
   <script defer src="js/pdf-viewer.js"></script>
   <script defer src="js/compass.js"></script>
   <script defer src="js/level.js"></script>
+  <script defer src="vendor/exifr-7.1.3.umd.js"></script>
+  <script defer src="js/photo-metadata.js"></script>
   <script defer src="js/app.js"></script>
   <script defer src="js/pwa.js"></script>
 </head>
@@ -75,7 +77,8 @@
       <qr-reader v-else-if="page === 'qr'" :t="t"></qr-reader>
       <pdf-viewer v-else-if="page === 'pdf'" :t="t"></pdf-viewer>
       <compass-tool v-else-if="page === 'compass'" :t="t"></compass-tool>
-      <level-tool v-else :t="t"></level-tool>
+      <level-tool v-else-if="page === 'level'" :t="t"></level-tool>
+      <photo-metadata v-else :t="t"></photo-metadata>
     </main>
 
     <footer class="site-footer"><span>SMT · {{ version }}</span></footer>
@@ -221,6 +224,42 @@
       </div>
       <p v-if="reference" class="level-calibrated">{{ t('level.calibrated') }}</p>
       <p class="qr-local-note">{{ t('level.hint') }}</p>
+    </section>
+  </template>
+  <template id="photo-metadata-template">
+    <section class="metadata-page" aria-labelledby="metadata-title">
+      <a class="back-link" href="#/">← {{ t('metadata.back') }}</a>
+      <div class="qr-heading">
+        <span class="eyebrow">{{ t('tool.metadata.category') }}</span>
+        <h1 id="metadata-title">{{ t('tool.metadata.name') }}</h1>
+        <p>{{ t('metadata.intro') }}</p>
+      </div>
+      <div class="scanner-controls">
+        <button type="button" class="primary-button metadata-choose" @click="fileInput.click()">{{ t('metadata.choose') }}</button>
+        <button v-if="fileInfo" type="button" class="secondary-button metadata-clear" @click="clear">{{ t('metadata.clear') }}</button>
+        <a v-if="exportUrl" :href="exportUrl" :download="fileInfo.name + '.metadata.json'" class="secondary-button metadata-export">{{ t('metadata.export') }}</a>
+        <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/tiff,image/heic,image/heif,image/avif,.jpg,.jpeg,.png,.tif,.tiff,.heic,.heif,.avif" hidden @change="selectPhoto">
+      </div>
+      <p v-if="loading" class="scan-status" role="status">{{ t('metadata.loading') }}</p>
+      <div v-if="fileInfo" class="metadata-file">
+        <img v-if="previewUrl && !previewFailed" :key="previewUrl" :src="previewUrl" :alt="t('metadata.preview')" class="metadata-preview" @error="onPreviewError">
+        <p v-if="previewFailed" class="qr-local-note">{{ t('metadata.noPreview') }}</p>
+        <h2>{{ t('metadata.fileInfo') }}</h2>
+        <dl class="metadata-file-info"><dt>{{ t('metadata.fileName') }}</dt><dd>{{ fileInfo.name }}</dd><dt>{{ t('metadata.fileType') }}</dt><dd>{{ fileInfo.type || t('metadata.unknown') }}</dd><dt>{{ t('metadata.fileSize') }}</dt><dd>{{ fileInfo.byteSize }} B</dd><dt>{{ t('metadata.fileModified') }}</dt><dd>{{ fileInfo.lastModified || t('metadata.unknown') }}</dd></dl>
+      </div>
+      <div v-if="warning" class="qr-notice" role="status"><p>{{ t(warning) }}</p><details v-if="issues.length"><summary>{{ t('metadata.issues') }}</summary><ul><li v-for="(issue, index) in issues" :key="index">{{ issue }}</li></ul></details></div>
+      <section v-if="fileInfo && !loading" class="metadata-results" aria-labelledby="metadata-results-title">
+        <h2 id="metadata-results-title">{{ t('metadata.embedded') }} <span class="count">{{ rows.length }}</span></h2>
+        <p v-if="!rows.length" class="qr-local-note">{{ t('metadata.empty') }}</p>
+        <template v-else>
+          <label class="metadata-search-label" for="metadata-search">{{ t('metadata.search') }}</label>
+          <input id="metadata-search" v-model="query" type="search" :placeholder="t('metadata.searchPlaceholder')" class="metadata-search">
+          <p v-if="!filteredRows.length" role="status">{{ t('metadata.noMatches') }}</p>
+          <div v-else class="metadata-table-wrap"><table class="metadata-table"><thead><tr><th scope="col">{{ t('metadata.group') }}</th><th scope="col">{{ t('metadata.tag') }}</th><th scope="col">{{ t('metadata.value') }}</th></tr></thead><tbody><tr v-for="row in filteredRows" :key="row.key"><td>{{ row.group }}</td><th scope="row">{{ row.name }}</th><td><pre v-if="row.value.length <= 240">{{ row.value }}</pre><details v-else><summary>{{ t('metadata.fullValue') }} ({{ row.value.length }})</summary><pre>{{ row.value }}</pre></details></td></tr></tbody></table></div>
+        </template>
+      </section>
+      <p class="qr-local-note">{{ t('metadata.scope') }}</p>
+      <p class="qr-local-note">{{ t('metadata.localNote') }}</p>
     </section>
   </template>
 </body>

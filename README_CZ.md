@@ -4,7 +4,7 @@ Small tools — malé nástroje pro každý den
 
 [English version](README.md) · [Živá aplikace](https://pkristofik49.github.io/SMT/)
 
-Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Menu obsahuje pouze čtyři implementované nástroje: čtečku QR kódů, místní prohlížeč PDF, kompas a vodováhu. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
+Vue SPA s dvousloupcovým menu nástrojů (na mobilu jeden sloupec). Menu obsahuje pouze pět implementovaných nástrojů: čtečku QR kódů, místní prohlížeč PDF, kompas, vodováhu a čtečku metadat fotky. Hledání prochází názvy, kategorie a popisy bez ohledu na velikost písmen a českou diakritiku; při prázdném výsledku nabízí zrušení filtru.
 
 ## Čtečka QR kódů
 
@@ -48,11 +48,21 @@ Režim **Na delší hraně** slouží k postavení telefonu na levou nebo pravou
 
 Nástroj funguje v uložené offline PWA na podporovaných telefonech přes HTTPS nebo localhost, bez další knihovny a odesílání dat. Přesnost mohou ovlivnit senzory, pouzdro telefonu a nerovnosti jeho zadní strany. Programové testy používají simulované senzory; přesnost fyzického zařízení je ještě potřeba ověřit.
 
+## Metadata fotky
+
+Otevřete pátou dlaždici nebo `#/photo-metadata` a vyberte fotku. Čtečka vypisuje každé pole vrácené lokálním parserem **exifr 7.1.3 full UMD**, rozdělené podle segmentu či jmenného prostoru. Zapíná EXIF/TIFF IFD obrázku i náhledu, GPS, interoperabilní tagy, bajty MakerNote a UserComment, XMP včetně rozšířených paketů, IPTC, ICC, JFIF a PNG IHDR tam, kde je daný formát podporuje. Neznámé číselné tagy a vnitřní ukazatele zůstávají zachované. Tagy hlavního obrázku a náhledu jsou oddělené; původní XMP paket je přidaný také pro zachování údajů, které by při dekódování mohly kolidovat. Číselné hodnoty ani uložené datumové řetězce se nenahrazují přeloženými popisy nebo objekty data. Parser může přidat odvozená pole, například desetinné GPS souřadnice.
+
+Podporované kontejnery jsou JPEG, TIFF, HEIC/HEIF, AVIF a PNG, každý s jiným pokrytím metadat. Jde o výpis všech **rozpoznaných** polí, nikoli záruku všech dat v souboru. Proprietární MakerNotes mohou zůstat nerozluštěnými binárními bloky a nepodporované bloky mohou chybět. Knihovna zejména neumí v prohlížeči rozbalovat ICC profily PNG; pokrytí XMP/IPTC v HEIF je omezené. Textové bloky PNG a libovolné proprietární formáty nejsou univerzálně podporované. Částečné chyby se zobrazí spolu s dostupnými poli; nepodporovaný nebo nečitelný soubor stále ukáže údaje o souboru. Nenalezení rozpoznaných vložených polí neprokazuje absenci metadat. Viz [podpora formátů knihovny](https://github.com/MikeKovarik/exifr).
+
+Samostatná část s údaji o souboru obsahuje název, MIME typ, velikost v bajtech a čas poslední změny v UTC hlášené prohlížečem; poslední změna není čas pořízení fotky. Nativní náhled fotografie je volitelný: metadata lze přečíst, i když prohlížeč nedokáže obrázek vykreslit. Hledání filtruje názvy a hodnoty. Dlouhé hodnoty lze rozbalit celé; binární bloky používají hexadecimální data s přesnou délkou v bajtech. **Stáhnout JSON** exportuje celý nefiltrovaný výpis včetně údajů o souboru, rozpoznaných polí, původního XMP, binárních hodnot, potíží čtení a verze parseru.
+
+Soubory se čtou lokálně bez odesílání na server, požadavků na CDN či ukládání do úložiště prohlížeče. Výpis popisuje skutečný soubor předaný výběrem; galerie, editor nebo sdílení již mohly metadata odstranit či změnit. Výběr lze zrušit, stejný soubor lze zvolit opakovaně a zavření či opuštění nástroje uvolní URL náhledu a exportu a zahodí opožděné výsledky. Čtečka i parser se ukládají pro offline použití. Závislost exifr uživatel výslovně schválil; nepřibyl správce balíčků ani sestavování. `vendor/EXIFR-NOTICE.txt` zaznamenává zdroj a ověření integrity balíčku a `vendor/EXIFR-LICENSE` obsahuje licenci MIT.
+
 ## Spuštění
 
 Otevřete `index.html` v aktuálním prohlížeči nebo adresář projektu zpřístupněte stávajícím statickým HTTP serverem, například IIS. Klasické odložené skripty a relativní cesty podporují místní soubory i `/SMT/` na GitHub Pages. Není potřeba správce balíčků, sestavování, Node.js, router ani knihovna uživatelského rozhraní.
 
-Jediná externí knihovna je **Vue 3.5.45**, uložená lokálně v `vendor/vue.global.prod.js`, s licencí MIT v `vendor/VUE-LICENSE`. Všechny prostředky aplikace jsou místní: žádné požadavky na CDN ani externí fonty. Po stažení aplikace běží z disku bez internetu. Web podporuje také instalaci jako PWA a spuštění offline po prvním úplném online načtení.
+Externí knihovny jsou **Vue 3.5.45**, uložená lokálně v `vendor/vue.global.prod.js`, a uživatelem schválený **exifr 7.1.3** v `vendor/exifr-7.1.3.umd.js`. Jejich licence MIT jsou v `vendor/VUE-LICENSE` a `vendor/EXIFR-LICENSE`. Všechny prostředky aplikace jsou místní: žádné požadavky na CDN ani externí fonty. Po stažení aplikace běží z disku bez internetu. Web podporuje také instalaci jako PWA a spuštění offline po prvním úplném online načtení.
 
 ## Web a PWA
 
@@ -60,7 +70,7 @@ Použijte běžný web, nebo otevřete [Small Tools](https://pkristofik49.github
 
 `manifest.webmanifest` definuje relativní ID aplikace, startovací URL a rozsah; funguje pod `/SMT/` i v kořeni místního HTTP serveru. Místní PNG ikony zahrnují aplikační ikony 192 a 512 px, maskovatelnou ikonu 512 px a Apple touch ikonu 180 px. `scripts/generate-icons.ps1` je reprodukuje podle stávající značky s mřížkou pomocí Windows System.Drawing bez dalších závislostí.
 
-`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, kompas, vodováha, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
+`js/pwa.js` po načtení stránky registruje `sw.js`. Service worker vyžaduje v produkci HTTPS nebo při vývoji localhost. Náhled přímo ze souboru zůstává funkční jako běžná webová stránka, ale nemůže registrovat worker ani instalovat offline podporu. Po první úplné instalaci workeru fungují menu, hledání, čtečka QR, prohlížeč PDF, kompas, vodováha, metadata fotky, překlady, styly a ikony offline, také po zavření a opětovném otevření aplikace. Instalace PWA není podmínkou ukládání do cache. Vymazání dat webu nebo uvolnění úložiště prohlížečem může uložené soubory odstranit; pro obnovení otevřete web znovu online.
 
 Každá verze předem uloží všechny soubory aplikace. Neúplné stažení přeruší instalaci a zachová běžící verzi. Úplná aktualizace čeká na zavření všech karet prohlížeče a oken aplikace používajících předchozí worker; po opětovném otevření se aktivuje. Nedochází k vynucenému obnovení ani `skipWaiting()`. Návrat do viditelné aplikace nebo obnovení připojení ověří aktualizace. Úklid cache se týká pouze starých verzí této aplikace v jejím rozsahu. Nové soubory potřebné za běhu přidávejte do `SHELL` a `RELEASE` workeru udržujte shodný s verzí aplikace.
 
@@ -74,12 +84,13 @@ js/qr-reader.js              Komponenta nativní kamery a čtečky QR
 js/pdf-viewer.js             Komponenta nativního prohlížeče místních PDF
 js/compass.js                Komponenta kompasu s nativními senzory
 js/level.js                  Dvouosá nativní vodováha a kalibrace
+js/photo-metadata.js         Místní metadata fotografie a export JSON
 js/translations.js           Lokalizované texty aplikace (čeština)
 js/version.js                Verze aplikace
 js/pwa.js                    Registrace service workeru a kontroly aktualizací
 manifest.webmanifest         Instalační metadata
 sw.js                        Verzované offline soubory aplikace
-vendor/                      Lokální distribuce Vue a licence
+vendor/                      Lokální distribuce Vue a exifr a jejich licence
 icons/                       Ikona aplikace
 .githooks/pre-commit          Verzovaný hook pro verzování
 scripts/update-version.ps1   Skript pro aktualizaci verze
@@ -89,6 +100,8 @@ tests/qr.html                Integrační testy životního cyklu čtečky QR
 tests/pdf.html               Testy výběru PDF a životního cyklu dokumentu
 tests/compass.html           Testy azimutu a oprávnění kompasu
 tests/level.html             Testy vodováhy, kalibrace a životního cyklu
+tests/metadata.html          Skutečné čtení metadat a testy životního cyklu
+tests/metadata-fixtures.js   Generované binární EXIF/GPS/XMP/IPTC testovací soubory
 tests/versioning.ps1         Oddělené testy verzovacího hooku
 tests/pwa.html               Integrační testy offline provozu a aktualizací
 tests/serve-pwa.ps1          Místní server testů PWA
@@ -134,6 +147,8 @@ Příkazem `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps
 Příkaz `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage compass.html` spouští simulované testy orientačních událostí: odmítnutí oprávnění, světové strany, směr a přesnost Safari, odmítnutí relativních dat, otočení obrazovky, náklon, chybějící data, zrušení, pozastavení a úklid při navigaci. Testy ověřují chování programu, nikoli přesnost fyzických senzorů.
 
 Příkaz `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage level.html` ověří simulované údaje ve dvou osách, směr a limity bubliny, kalibraci a její zrušení, otočení měření i reference, toleranci půl stupně, odmítnutí polohy displejem dolů, oprávnění, chybějící data a úklid životního cyklu.
+
+Příkaz `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage metadata.html` ověří skutečné čtení generovaných JPEG EXIF/GPS/XMP/IPTC i TIFF/PNG, oddělení náhledu, neznámé tagy, úplné bajty MakerNote, původní XMP, bezpečné textové vykreslení, hledání, export JSON, částečné chyby, zrušení a uvolňování URL. Pouze částečné chyby a zrušení používají simulované odpovědi parseru. Sada PWA také čte a exportuje EXIF/GPS při nedostupném serveru. Chování výběru HEIC/AVIF je ještě potřeba ověřit na reprezentativních skutečných zařízeních.
 
 ## GitHub Pages
 

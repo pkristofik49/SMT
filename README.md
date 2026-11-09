@@ -4,7 +4,7 @@ Small tools — everyday utilities
 
 [Czech version](README_CZ.md) · [Live application](https://pkristofik49.github.io/SMT/)
 
-A Vue SPA with a two-column tool menu (one column on mobile). The menu contains only the four implemented tools: a QR reader, a local PDF viewer, a compass, and a spirit level. Search matches names, categories, and descriptions regardless of case and Czech diacritics, and offers a reset when nothing matches.
+A Vue SPA with a two-column tool menu (one column on mobile). The menu contains only the five implemented tools: a QR reader, a local PDF viewer, a compass, a spirit level, and a photo metadata reader. Search matches names, categories, and descriptions regardless of case and Czech diacritics, and offers a reset when nothing matches.
 
 ## QR reader
 
@@ -48,11 +48,21 @@ Choose **On long edge** to rest the phone on its left or right long edge with th
 
 The tool works in the cached offline PWA on supported phones over HTTPS or localhost, with no extra library or uploaded data. Device sensors, phone cases, and uneven backs can affect accuracy. Software tests use simulated sensors; physical-device accuracy still needs checking.
 
+## Photo metadata
+
+Open the fifth tile or `#/photo-metadata` and select a photo. The reader lists every field returned by the local **exifr 7.1.3 full UMD** parser, grouped by segment/namespace. It enables EXIF/TIFF image and thumbnail IFDs, GPS, interoperability tags, MakerNote and UserComment bytes, XMP including extended packets, IPTC, ICC, JFIF, and PNG IHDR where the format supports them. Unknown numeric tags and internal pointers are retained. Main-image and thumbnail tags remain separate; the original XMP packet is also included to preserve data that could collide during decoding. Numeric values and stored date strings are not replaced with translated descriptions or revived dates. The parser may add derived fields such as decimal GPS coordinates.
+
+Supported containers are JPEG, TIFF, HEIC/HEIF, AVIF, and PNG, with different metadata coverage for each. This is a list of all **recognized** fields, not a guarantee of all data in a file. Proprietary MakerNotes can remain undecoded binary blocks, and unsupported blocks can be absent. In particular, the library cannot decompress PNG ICC profiles in the browser; HEIF XMP/IPTC coverage is limited. PNG text chunks and arbitrary proprietary formats are not universally supported. Partial errors are shown with the available fields, while an unsupported or unreadable file still shows its native file attributes. No recognized embedded fields does not prove that a file has no metadata. See the [upstream format support](https://github.com/MikeKovarik/exifr).
+
+The separate file-information section contains the browser-provided filename, MIME type, byte size, and last-modified timestamp in UTC; the latter is not the photo's capture time. A native photo preview is optional: metadata can be read even when the browser cannot decode the image for display. Search filters names and values. Long values expand in full; binary blocks use hexadecimal data with their exact byte length. **Download JSON** exports the complete unfiltered report, including file attributes, parsed fields, original XMP, binary values, reading issues, and parser version.
+
+Files are parsed locally, without uploads, CDN requests, or browser-storage persistence. The report describes the actual file passed by the picker; a gallery, editor, or sharing application might already have removed or changed metadata. Selection can be cancelled, the same file can be selected again, and closing or leaving the tool releases preview/export URLs and discards late results. The reader and parser are cached for offline use. The exifr dependency was explicitly approved by the user; no package manager or build step was added. `vendor/EXIFR-NOTICE.txt` records its source and package-integrity verification, and `vendor/EXIFR-LICENSE` contains its MIT licence.
+
 ## Running
 
 Open `index.html` in a current browser or serve the project directory with an existing static HTTP server, such as IIS. Classic deferred scripts and relative paths support both local files and `/SMT/` on GitHub Pages. No package manager, build step, Node.js, router, or UI library is needed.
 
-The only external library is **Vue 3.5.45**, stored locally in `vendor/vue.global.prod.js`, with its MIT licence in `vendor/VUE-LICENSE`. All application assets are local: there are no CDN or font requests. After downloading, the application runs from disk without internet. The website also supports installation as a PWA and offline startup after its first complete online load.
+The external libraries are **Vue 3.5.45**, stored locally in `vendor/vue.global.prod.js`, and the user-approved **exifr 7.1.3**, stored in `vendor/exifr-7.1.3.umd.js`. Their MIT licences are in `vendor/VUE-LICENSE` and `vendor/EXIFR-LICENSE`. All application assets are local: there are no CDN or font requests. After downloading, the application runs from disk without internet. The website also supports installation as a PWA and offline startup after its first complete online load.
 
 ## Web and PWA
 
@@ -60,7 +70,7 @@ Use the ordinary website or open [Small Tools](https://pkristofik49.github.io/SM
 
 `manifest.webmanifest` defines a relative app ID, start URL, and scope, working both under `/SMT/` and at a local HTTP server root. Local PNG icons include 192 and 512 px application icons, a maskable 512 px icon, and a 180 px Apple touch icon. `scripts/generate-icons.ps1` reproduces them from the existing grid mark using Windows System.Drawing without additional dependencies.
 
-`js/pwa.js` registers `sw.js` after page load. Service workers require HTTPS in production or localhost for development. Direct file previews still work as ordinary web pages but cannot register a worker or install offline support. After the worker finishes its first complete installation, the menu, search, QR reader, PDF viewer, compass, spirit level, translations, styles, and icons work offline, including after closing and reopening the app. PWA installation is optional for caching. Clearing browser site data or browser storage eviction can remove cached files; open the website online again to restore them.
+`js/pwa.js` registers `sw.js` after page load. Service workers require HTTPS in production or localhost for development. Direct file previews still work as ordinary web pages but cannot register a worker or install offline support. After the worker finishes its first complete installation, the menu, search, QR reader, PDF viewer, compass, spirit level, photo metadata, translations, styles, and icons work offline, including after closing and reopening the app. PWA installation is optional for caching. Clearing browser site data or browser storage eviction can remove cached files; open the website online again to restore them.
 
 Every release precaches the whole application shell. An incomplete download fails installation and preserves the running release. A complete update waits until all browser tabs and app windows using the previous worker close, then activates on reopening. There is no forced reload or `skipWaiting()`. Returning to a visible app or reconnecting checks for updates. Cache cleanup affects only this application's old releases within its scope. Keep new runtime assets in `SHELL` and keep the worker's `RELEASE` identical to the application version.
 
@@ -74,12 +84,13 @@ js/qr-reader.js              Native camera and QR-reader component
 js/pdf-viewer.js             Native local PDF-viewer component
 js/compass.js                Native sensor compass component
 js/level.js                  Two-axis native spirit level and calibration
+js/photo-metadata.js         Local photo metadata and JSON export
 js/translations.js           Localized application text (Czech)
 js/version.js                Application version
 js/pwa.js                    Service-worker registration and update checks
 manifest.webmanifest         Installation metadata
 sw.js                        Versioned offline application shell
-vendor/                      Local Vue distribution and licence
+vendor/                      Local Vue and exifr distributions and licences
 icons/                       Application icon
 .githooks/pre-commit          Tracked versioning hook
 scripts/update-version.ps1   Version update script
@@ -89,6 +100,8 @@ tests/qr.html                QR-reader lifecycle integration tests
 tests/pdf.html               PDF selection and lifecycle tests
 tests/compass.html           Compass heading and permission tests
 tests/level.html             Spirit level, calibration, and lifecycle tests
+tests/metadata.html          Real photo metadata parsing and lifecycle tests
+tests/metadata-fixtures.js   Generated EXIF/GPS/XMP/IPTC binary fixtures
 tests/versioning.ps1         Isolated version-hook tests
 tests/pwa.html               Offline and update integration tests
 tests/serve-pwa.ps1          Local PWA test server
@@ -134,6 +147,8 @@ Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -Test
 Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage compass.html` for simulated orientation-event tests: permission denial, cardinal headings, Safari heading and accuracy, relative-data rejection, screen rotation, tilt, missing data, cancellation, pause, and navigation cleanup. These tests verify software behavior, not physical sensor accuracy.
 
 Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage level.html` for simulated two-axis readings, bubble direction and limits, calibration and reset, rotation of readings and reference, half-degree tolerance, face-down rejection, permission handling, missing data, and lifecycle cleanup.
+
+Use `powershell -NoProfile -ExecutionPolicy Bypass -File tests/run-pwa.ps1 -TestPage metadata.html` for real generated JPEG EXIF/GPS/XMP/IPTC and TIFF/PNG parsing, thumbnail separation, unknown tags, full MakerNote bytes, original XMP, safe text rendering, search, JSON export, partial failures, cancellation, and URL cleanup. Only partial-error and cancellation paths use simulated parser responses. The PWA suite also parses and exports EXIF/GPS with the server unavailable. HEIC/AVIF device-picker behavior still requires representative real-device checks.
 
 ## GitHub Pages
 
